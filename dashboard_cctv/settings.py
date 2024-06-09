@@ -46,9 +46,10 @@ INSTALLED_APPS = [
     "corsheaders",
     "auth.apps.AuthConfig",
     "common",
+    "vehicle",
     "rest_framework",
     "rest_framework.authtoken",
-    "drf_yasg"
+    "drf_yasg",
 ]
 
 MIDDLEWARE = [
@@ -155,7 +156,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "libs.middleware.CustomTokenAuthentication",
+        # "libs.middleware.CustomTokenAuthentication",
+        "libs.middleware.JWTAuthentication",
     ],
     "COERCE_DECIMAL_TO_STRING": False,
 }

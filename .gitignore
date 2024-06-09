@@ -37,3 +37,4 @@ celerybeat.pid
 src/
 
 .env
+dashboard_cctv/local_settings.py

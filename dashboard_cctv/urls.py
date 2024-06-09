@@ -20,6 +20,8 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from common.router import router as common_router
+from vehicle.router import router as vehicle_router
+from user.router import router as user_router
 from auth.router import router as auth_router
 from django.conf.urls.i18n import i18n_patterns
 from django.views.i18n import set_language
@@ -39,8 +41,10 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    path("api/common/", include(common_router.urls)),
     path("api/auth/", include(auth_router.urls)),
+    path("api/common/", include(common_router.urls)),
+    path("api/vehicle/", include(vehicle_router.urls)),
+    path("api/user/", include(user_router.urls)),
     path("i18n/setlang/", set_language, name="set_language"),
     path("i18n/setlang/", set_language, name="set_language"),
     path(

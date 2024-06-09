@@ -1,5 +1,8 @@
-from rest_framework.authentication import TokenAuthentication
 import threading
+from django.utils.translation import gettext_lazy as _
+from libs.auth import decode_auth_token
+from rest_framework import exceptions
+from rest_framework.authentication import TokenAuthentication
 
 _thread_locals = threading.local()
 
@@ -55,3 +58,30 @@ class CustomTokenAuthentication(TokenAuthentication):
         user, token = super().authenticate_credentials(key)
         _thread_locals.user = user
         return user, token
+
+
+class JWTAuthentication(TokenAuthentication):
+    """
+    JWT token based authentication.
+
+    Clients should authenticate by passing the token key in the "Authorization"
+    HTTP header, prepended with the string "Token ".  For example:
+
+        Authorization: Token eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9....
+    """
+
+    keyword = "Token"
+
+    def authenticate_credentials(self, key):
+        from auth.models import AuthToken
+
+        _data, error = decode_auth_token(key)
+        if error:
+            raise exceptions.AuthenticationFailed(_(error))
+
+        auth_token = AuthToken.objects.filter(token=key).last()
+        if not auth_token:
+            raise exceptions.AuthenticationFailed(_("Invalid token."))
+
+        _thread_locals.user = auth_token.user
+        return auth_token.user, auth_token
