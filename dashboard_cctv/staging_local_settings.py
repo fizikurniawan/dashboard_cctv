@@ -4,7 +4,7 @@ import os
 import datetime
 
 # BASE_URL = "http://127.0.0.1:8000/"
-BASE_URL = "https://dashboard-cctv-api.staging.arnatech.id/"
+BASE_URL = "https://cctv.arnatech.id/"
 FE_BASE_URL = "https://dashboard-cctv.staging.arnatech.id/"
 DASHBOARD_BASE_URL = "https://dashboard-cctv-dashboard.staging.arnatech.id/"
 DEBUG = True
