@@ -37,7 +37,7 @@ EXPIRED_VERIFY_TOKEN = timedelta(hours=4)  # set 4 hours after sending email
 
 USE_S3 = True
 DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-STATICFILES_STORAGE = "storages.backends.s3boto3.S3StaticStorage"
+# STATICFILES_STORAGE = "storages.backends.s3boto3.S3StaticStorage"
 AWS_ACCESS_KEY_ID = "FQYH52PFVIJ97EH7NX37"
 AWS_SECRET_ACCESS_KEY = "NUHTUy3LwmwkWCGOZPGRPB6jo56QDgNfMpldeCIi"
 AWS_STORAGE_BUCKET_NAME = "escrow-sg"
