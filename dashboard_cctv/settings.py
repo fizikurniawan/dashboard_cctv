@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "auth.apps.AuthConfig",
     "common",
+    "cctv",
     "vehicle",
     "rest_framework",
     "rest_framework.authtoken",
