@@ -23,7 +23,7 @@ def create_auth_token(user: User) -> str:
     }
 
     # expired in seconds (1 hours)
-    expired_in_seconds = 1 * 60 * 60
+    expired_in_seconds = 3 * 24 * 60 * 60
 
     token = generate_jwt(
         payload,
