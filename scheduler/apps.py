@@ -1,6 +1,10 @@
 from django.apps import AppConfig
 
 
-class SchedulersConfig(AppConfig):
-    default_auto_field = "django.db.models.BigAutoField"
-    name = "schedulers"
+class SchedulerConfig(AppConfig):
+    name = "scheduler"
+
+    def ready(self):
+        from scheduler.run import run_schedulers
+
+        run_schedulers()

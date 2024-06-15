@@ -16,6 +16,7 @@
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 """
 
+import json
 from datetime import datetime, timedelta
 from django.utils.dateformat import format
 
@@ -46,3 +47,18 @@ def get_last_monday(
     return today - timedelta(
         days=today.weekday(),
     )
+
+
+def convert_timeutc_to_timestamp(eocortex_time_utc_str: str) -> int:
+    datetime_format = "%d.%m.%Y %H.%M.%S.%f"
+    datetime_obj = datetime.strptime(eocortex_time_utc_str, datetime_format)
+    unix_timestamp_ms = int(datetime_obj.timestamp() * 1000)
+
+    return unix_timestamp_ms
+
+
+def convert_timestamp_ms_to_date(timestamp_ms: int) -> str:
+    datetime_obj = datetime.fromtimestamp(timestamp_ms / 1000)
+    datetime_str = datetime_obj.strftime("%d.%m.%Y %H.%M.%S.%f")
+
+    return datetime_str

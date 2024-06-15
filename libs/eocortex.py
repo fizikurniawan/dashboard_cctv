@@ -1,5 +1,7 @@
 import requests
 import json
+import base64
+from datetime import datetime
 from common.models import Configuration
 
 
@@ -7,19 +9,33 @@ class EocortexManager(object):
     def __init__(self) -> None:
         self.base_url = self.get_base_url()
 
+    def get_credentials(self):
+        login = "root"
+        password = ""
+        credentials = f"{login}:{password}"
+        encoded_credentials = base64.b64encode(credentials.encode()).decode()
+        headers = {"Authorization": f"Basic {encoded_credentials}"}
+
+        return headers
+
     def get_base_url(self):
         config = Configuration.objects.filter(key="EOCORTEX_URL").first()
         return getattr(config, "value", None)
 
     def get_channels(self):
-        url = self.base_url + "/configex"
-        params = {"login": "root", "password": None, "responsetype": "json"}
-        response = requests.get(url, params=params)
-        channels = response.json()["Channels"]
-        channels_map = [{"id": i["Id"], "name": i["Name"]} for i in channels]
+        url = self.base_url + "/configure/channels"
+        response = requests.get(url, headers=self.get_credentials())
+        channels_map = [{"id": i["Id"], "name": i["Name"]} for i in response.json()]
         return channels_map
 
-    def get_result_lpr(self, start_ts, end_ts, channelId):
+    def get_cars(self):
+        url = self.base_url + "/api/cars"
+        response = requests.get(url, headers=self.get_credentials())
+        return response.json()
+
+    def get_result_lpr(
+        self, start_ts: datetime, end_ts: datetime, channelId: str
+    ) -> dict:
         url = self.base_url + "/autovprs_export"
         start_time = start_ts.strftime("%Y-%m-%d-%H-%M-%S-%f")
         finish_time = end_ts.strftime("%Y-%m-%d-%H-%M-%S-%f")
@@ -53,3 +69,33 @@ class EocortexManager(object):
 
         except Exception as e:
             print("Request failed:", e)
+
+    def get_registered_events(self):
+        url = self.base_url + "/command"
+        params = {
+            "login": "root",
+            "password": None,
+            "responsetype": "json",
+            "type": "getallregisteredevents",
+        }
+        response = requests.get(url, params=params)
+        json_start = response.text.find("[")
+        json_part = response.text[json_start:]
+        data = json.loads(json_part)
+
+        return [{"id": i["Id"], "name": i["GuiName"]} for i in data]
+
+    def get_events(self):
+        url = self.base_url + "/event"
+        params = {
+            "login": "root",
+            "password": None,
+            "responsetype": "json",
+            "filter": "57acfc1e-7420-4e4c-9b4f-eebd1950e2e8",
+        }
+        response = requests.get(url, params=params)
+        json_start = response.text.find("[")
+        json_part = response.text[json_start:]
+        data = json.loads(json_part)
+
+        return data

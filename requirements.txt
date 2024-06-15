@@ -18,3 +18,5 @@ google-cloud-storage==2.10.0
 
 # rstp to hls
 ffmpeg-python==0.2.0
+APScheduler==3.10.4
+mysqlclient==2.2.4

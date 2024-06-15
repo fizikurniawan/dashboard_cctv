@@ -21,7 +21,16 @@ DATABASES = {
         "HOST": "172.105.124.43",
         "PORT": "5432",
         "TEST": {"NAME": "dashboard_cctv_db_staging"},
-    }
+    },
+    "vms_system": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": "vms_system",
+        "USER": "admin",
+        "PASSWORD": "admin123",
+        "HOST": "172.16.7.7",
+        "PORT": "3306",
+        "TEST": {"NAME": "your_db_name"},
+    },
 }
 
 EMAIL_HOST = "mail.arnatech.id"

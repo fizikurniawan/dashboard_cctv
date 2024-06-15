@@ -1,6 +1,7 @@
 from django.db import models
 from libs.base_model import BaseModelGeneric
 from django.utils.translation import gettext_lazy as _
+from resident.models import Resident
 
 
 class VehicleType(BaseModelGeneric):
@@ -16,10 +17,12 @@ class VehicleType(BaseModelGeneric):
 
 class Vehicle(BaseModelGeneric):
     license_plate_number = models.CharField(max_length=250)
-    vehicle_type = models.ForeignKey(VehicleType, on_delete=models.SET_NULL, null=True, blank=True)
-    owner_full_name = models.CharField(max_length=255)
-    owner_contact = models.CharField(max_length=100)
-    code = models.CharField(max_length=100)
+    vehicle_type = models.ForeignKey(
+        VehicleType, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    owner = models.ForeignKey(
+        Resident, on_delete=models.SET_NULL, null=True, blank=True
+    )
 
     class Meta:
         verbose_name = _("Vehicle")

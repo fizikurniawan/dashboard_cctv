@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     "auth.apps.AuthConfig",
     "common",
     "cctv",
+    "resident",
+    "scheduler",
     "vehicle",
     "rest_framework",
     "rest_framework.authtoken",
