@@ -10,7 +10,7 @@ def get_last_resident():
             WHEN LVgender = 'P' THEN 1
         END AS gender,
         LVAdd1 AS address,
-        LPhoto as photo,
+        TO_BASE64(LPhoto) as photo,
         LVNewIC AS no_id
     FROM
         mykadopendata"""
