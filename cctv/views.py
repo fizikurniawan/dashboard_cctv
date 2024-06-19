@@ -31,9 +31,9 @@ class CameraViewSet(viewsets.ModelViewSet):
 
 class LPRViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPagination
-    filter_backends = (filters.SearchFilter,)
+    filter_backends = (filters.SearchFilter, django_filters.DjangoFilterBackend)
     search_fields = (
-        "plate_number",
+        "number_plate",
         "vehicle__owner__full_name",
         "vehicle__owner__no_id",
     )
