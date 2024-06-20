@@ -1,8 +1,8 @@
 from rest_framework import viewsets, filters
 from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from libs.pagination import CustomPagination
-from .models import Camera, LPR
-from .serializers import CameraSerializer, LPRSerializer
+from .models import Camera, LPR, Location
+from .serializers import CameraSerializer, LPRSerializer, LocationSerializer
 from django_filters import rest_framework as django_filters
 
 
@@ -15,6 +15,17 @@ class CameraFilterset(django_filters.FilterSet):
 
 class LPRFilterset(django_filters.FilterSet):
     channel_id = django_filters.CharFilter(field_name="channel_id", lookup_expr="exact")
+
+
+class LocationViewSet(viewsets.ModelViewSet):
+    pagination_class = CustomPagination
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ("name", "description")
+    permission_classes = (IsAuthenticated, DjangoModelPermissions)
+    queryset = Location.objects.filter()
+    http_method_names = ["get", "post", "patch", "delete", "head", "options"]
+    serializer_class = LocationSerializer
+    lookup_field = "id32"
 
 
 class CameraViewSet(viewsets.ModelViewSet):

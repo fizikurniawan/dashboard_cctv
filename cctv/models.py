@@ -6,6 +6,18 @@ from django.utils.translation import gettext_lazy as _
 from vehicle.models import Vehicle, Resident
 
 
+class Location(BaseModelGeneric):
+    name = models.CharField(max_length=150)
+    description = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.id32} {self.name}"
+
+    class Meta:
+        verbose_name = _("Location")
+        verbose_name_plural = _("Locations")
+
+
 class Camera(BaseModelGeneric):
     channel_id = models.CharField(max_length=150)
     name = models.CharField(max_length=150)
@@ -13,6 +25,9 @@ class Camera(BaseModelGeneric):
     is_active = models.BooleanField(default=True)
     order = models.PositiveIntegerField()
     is_gate = models.BooleanField(default=False)
+    location = models.ForeignKey(
+        Location, on_delete=models.SET_NULL, null=True, blank=True
+    )
 
     def __str__(self):
         return f"{self.channel_id} {self.name}"
