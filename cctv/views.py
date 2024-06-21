@@ -1,9 +1,12 @@
-from rest_framework import viewsets, filters
+from rest_framework import viewsets, filters, decorators, response
 from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from libs.pagination import CustomPagination
 from .models import Camera, LPR, Location
 from .serializers import CameraSerializer, LPRSerializer, LocationSerializer
 from django_filters import rest_framework as django_filters
+from django.shortcuts import get_object_or_404
+from datetime import datetime, time
+from django.utils.timezone import make_aware
 
 
 class CameraFilterset(django_filters.FilterSet):
@@ -38,6 +41,32 @@ class CameraViewSet(viewsets.ModelViewSet):
     serializer_class = CameraSerializer
     filterset_class = CameraFilterset
     lookup_field = "id32"
+
+    @decorators.action(
+        methods=["GET"], detail=False, url_path=r"(?P<channel_id>[^/.]+)/statistic"
+    )
+    def get_statistic(self, request, channel_id=None):
+        get_object_or_404(Camera, channel_id=channel_id)
+        today = datetime.now().date()
+
+        # Combine the current date with the time 00:00:00 and 23:59:59
+        start_of_today = (
+            make_aware(datetime.combine(today, time.min)).timestamp() * 1000
+        )
+        end_of_today = make_aware(datetime.combine(today, time.max)).timestamp() * 1000
+        lpr = LPR.objects.filter(
+            vehicle__isnull=False,
+            channel_id=channel_id,
+            time_utc_timestamp__gte=start_of_today,
+            time_utc_timestamp__lte=end_of_today,
+        )
+
+        total_movement = lpr.count()
+        total_visitor = len(list(set(lpr.values_list("vehicle_id", flat=True))))
+
+        return response.Response(
+            {"total_movement": total_movement, "total_visitor": total_visitor}
+        )
 
 
 class LPRViewSet(viewsets.ModelViewSet):

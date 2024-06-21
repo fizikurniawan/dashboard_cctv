@@ -1,11 +1,13 @@
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from django.contrib.auth.models import User
 from auth.models import AuthToken
 from libs.auth import create_auth_token, create_refresh_token
 from typing import Tuple
 from ..serializers import SignInSerializer, GetAuthFromRefreshTokenSZ
+from user.serializers import UserSerializer
 
 
 class SignInViewSet(GenericViewSet):
@@ -53,3 +55,13 @@ class RefreshTokenViewSet(GenericViewSet):
         AuthToken.objects.create(token=token, user=user)
 
         return Response({"token": token, "refresh_token": refresh_token})
+
+
+class MeViewSet(GenericViewSet):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UserSerializer
+
+    def list(self, request):
+        user = request.user
+        serializer = self.get_serializer(user)
+        return Response(serializer.data)
