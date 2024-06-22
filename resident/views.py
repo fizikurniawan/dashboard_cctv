@@ -33,7 +33,7 @@ class ResidentViewSet(viewsets.ModelViewSet):
         photo = resident_dict.pop("photo", None)
         if photo:
             file_name = f"photo_of_{resident_dict['full_name']}.jpeg"
-            file_data = ContentFile(base64.b64decode(photo), name=f"temp.image/jpeg")
+            file_data = ContentFile(base64.b64decode(photo), name=file_name)
             file_instance = File.objects.create(file=file_data, name=file_name)
             resident_dict["photo"] = FileLiteSerializer(file_instance).data
         else:
