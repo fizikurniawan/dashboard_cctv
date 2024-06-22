@@ -10,10 +10,14 @@ def get_last_resident():
             WHEN LVgender = 'P' THEN 1
         END AS gender,
         LVAdd1 AS address,
-        TO_BASE64(LPhoto) as photo,
+        TO_BASE64 (LPhoto) as photo,
         LVNewIC AS no_id
     FROM
-        mykadopendata"""
-    results = db.run_query(cursor, sql)
+        mykadopendata
+    ORDER BY
+        RdTimeStamp DESC
+    LIMIT
+        1"""
+    result = db.get_one(db.run_query(cursor, sql))
     cursor.close()
-    return results
+    return result

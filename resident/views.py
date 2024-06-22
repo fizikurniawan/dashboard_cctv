@@ -6,6 +6,10 @@ from libs.pagination import CustomPagination
 from libs.resident import get_last_resident
 from .models import Resident
 from .serializers import ResidentReadSerializer, ResidentWriteSerializer
+from django.core.files.base import ContentFile
+import base64
+from common.models import File
+from common.serializers import FileLiteSerializer
 
 
 class ResidentViewSet(viewsets.ModelViewSet):
@@ -25,4 +29,14 @@ class ResidentViewSet(viewsets.ModelViewSet):
 
     @decorators.action(methods=["GET"], detail=False, url_path="recent")
     def get_last_resident(self, request):
-        return response.Response(get_last_resident())
+        resident_dict = get_last_resident()
+        photo = resident_dict.pop("photo", None)
+        if photo:
+            file_name = f"photo_of_{resident_dict['full_name']}.jpeg"
+            file_data = ContentFile(base64.b64decode(photo), name=f"temp.image/jpeg")
+            file_instance = File.objecs.create(file=file_data, name=file_name)
+            resident_dict["photo"] = FileLiteSerializer(file_instance).data
+        else:
+            resident_dict["photo"] = None
+
+        return response.Response(resident_dict)
