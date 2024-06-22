@@ -39,4 +39,28 @@ class ResidentViewSet(viewsets.ModelViewSet):
         else:
             resident_dict["photo"] = None
 
+        gender_dict = {
+            0: {
+                "value": 0,
+                "text": "Male",
+            },
+            1: {
+                "value": 1,
+                "text": "Female",
+            },
+        }
+        resident_dict["gender"] = gender_dict.get(resident_dict["gender"])
+
+        doc_type_dict = {
+            "DL": {
+                "value": "DL",
+                "text": "Daily Pass",
+            },
+            "ML": {
+                "value": "ML",
+                "text": "Monthly Pass",
+            },
+        }
+        resident_dict["doc_type"] = doc_type_dict.get(resident_dict["doc_type"])
+
         return response.Response(resident_dict)

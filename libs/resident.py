@@ -11,7 +11,8 @@ def get_last_resident():
         END AS gender,
         LVAdd1 AS address,
         TO_BASE64 (LPhoto) as photo,
-        LVNewIC AS no_id
+        LVNewIC AS no_id,
+        DocType as doc_type
     FROM
         mykadopendata
     ORDER BY
