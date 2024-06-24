@@ -32,7 +32,7 @@ class VehicleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vehicle
         fields = ("id32", "license_plate_number", "vehicle_type", "owner", "last_checkin")
-        read_only_fields = ("full_name", "no_id")
+        read_only_fields = ("full_name", "no_id", "last_checkin")
 
 
 class VehicleWriteSerializer(VehicleSerializer):
