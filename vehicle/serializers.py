@@ -11,7 +11,7 @@ class VehicleTypeSerializer(serializers.ModelSerializer):
 
 
 class VehicleSerializer(serializers.ModelSerializer):
-    last_checkin = serializers.IntegerField()
+    last_checkin = serializers.IntegerField(read_only=True)
     id32 = serializers.CharField(read_only=True)
     vehicle_type = serializers.SerializerMethodField()
     owner = serializers.SerializerMethodField()
