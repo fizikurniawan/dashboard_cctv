@@ -1,5 +1,7 @@
+import datetime
 from django_filters import rest_framework as django_filters
-from rest_framework import viewsets, filters
+from django.shortcuts import HttpResponse
+from rest_framework import viewsets, filters, decorators
 from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from libs.filter import CreatedAtFilterMixin
 from libs.pagination import CustomPagination
@@ -10,6 +12,7 @@ from .serializers import (
     VehicleWriteSerializer,
     VehicleTypeSerializer,
 )
+from libs.csv import create_csv_file
 
 
 class VehicleFilter(CreatedAtFilterMixin):
@@ -51,3 +54,29 @@ class VehicleViewSet(viewsets.ModelViewSet):
         if self.action in ["create"]:
             return VehicleWriteSerializer
         return VehicleSerializer
+
+    @decorators.action(methods=["GET"], detail=False, url_path="csv")
+    def get_csv(self, request):
+        queryset = self.filter_queryset(self.get_queryset())
+        data = []
+        for q in queryset:
+            data.append(
+                {
+                    "ID": q.id32,
+                    "Nomor Kendaraan": q.license_plate_number,
+                    "Tipe Kendaraan": q.vehicle_type.name,
+                    "Pemilik": q.owner.full_name,
+                    "Last Checkin": q.last_checkin_str
+                }
+            )
+
+        output = create_csv_file(data)
+        filename = f"vehicle_{datetime.datetime.now().strftime('%Y-%m-%d')}.csv"
+        http_response = HttpResponse(
+            output,
+            content_type="text/csv",
+        )
+        http_response["Content-Disposition"] = "attachment; filename=%s" % filename
+        http_response["Access-Control-Expose-Headers"] = "Content-Disposition"
+
+        return http_response

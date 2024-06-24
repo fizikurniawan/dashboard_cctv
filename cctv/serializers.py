@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Camera, LPR, Location
+from .models import Camera, LPR, Location, CommandCenter
 from django.conf import settings
 from vehicle.serializers import VehicleSerializer
 
@@ -77,3 +77,58 @@ class LPRSerializer(serializers.ModelSerializer):
     class Meta:
         model = LPR
         fields = "__all__"
+
+
+class CommandCenterReadSerializer(serializers.ModelSerializer):
+    cameras = serializers.SerializerMethodField()
+
+    def get_cameras(self, instance):
+        queryset = instance.cameras.filter()
+        if not queryset.exists():
+            return
+
+        return CameraSerializer(queryset, many=True).data
+
+    class Meta:
+        model = CommandCenter
+        fields = ("id32", "name", "cameras")
+
+
+class CommandCenterWriteSerializer(serializers.ModelSerializer):
+    cameras = serializers.ListSerializer(child=serializers.CharField())
+
+    def validate_cameras(self, data):
+        camera_instances = Camera.objects.filter(id32__in=data)
+        if not camera_instances.exists():
+            raise serializers.ValidationError("Invalid camera id32s")
+        return camera_instances
+
+    def validate_name(self, data):
+        instance = self.instance
+        exists_name = CommandCenter.objects.filter(name=data)
+        if instance:
+            exists_name = exists_name.exclude(id=instance.id)
+        if exists_name.exists():
+            raise serializers.ValidationError(
+                "Name has already exists. Pick another one"
+            )
+        return data
+
+    def create(self, validated_data):
+        cameras = validated_data.pop("cameras", [])
+        camera_instance = CommandCenter.objects.create(name=validated_data["name"])
+        camera_instance.cameras.set(cameras)
+
+        return camera_instance
+
+    def update(self, instance, validated_data):
+        cameras = validated_data.pop("cameras", [])
+        instance.name = validated_data["name"]
+        instance.cameras.set(cameras)
+
+        return instance
+
+    class Meta:
+        model = CommandCenter
+        fields = ("id32", "name", "cameras")
+        read_only_fields = ("id32", )

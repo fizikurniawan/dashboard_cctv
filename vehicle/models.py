@@ -24,6 +24,31 @@ class Vehicle(BaseModelGeneric):
         Resident, on_delete=models.SET_NULL, null=True, blank=True
     )
 
+    @property
+    def last_checkin(self):
+        from cctv.models import LPR
+
+        instance = (
+            LPR.objects.filter(vehicle=self, direction__iexact="in")
+            .order_by("-time_utc_timestamp")
+            .first()
+        )
+        if not instance:
+            return
+        return instance.time_utc_timestamp
+
+    @property
+    def last_checkin_str(self):
+        from datetime import datetime
+
+        ts = self.last_checkin
+        if not ts:
+            return
+        dt = datetime.fromtimestamp(ts/1000)
+        formatted_string = dt.strftime("%d %b %Y %H:%M:%S")
+
+        return formatted_string
+
     class Meta:
         verbose_name = _("Vehicle")
         verbose_name_plural = _("Vehicles")

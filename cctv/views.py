@@ -1,8 +1,14 @@
 from rest_framework import viewsets, filters, decorators, response
 from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from libs.pagination import CustomPagination
-from .models import Camera, LPR, Location
-from .serializers import CameraSerializer, LPRSerializer, LocationSerializer
+from .models import Camera, LPR, Location, CommandCenter
+from .serializers import (
+    CameraSerializer,
+    LPRSerializer,
+    LocationSerializer,
+    CommandCenterReadSerializer,
+    CommandCenterWriteSerializer,
+)
 from django_filters import rest_framework as django_filters
 from django.shortcuts import get_object_or_404
 from datetime import datetime, time
@@ -83,3 +89,18 @@ class LPRViewSet(viewsets.ModelViewSet):
     serializer_class = LPRSerializer
     lookup_field = "uuid"
     filterset_class = LPRFilterset
+
+
+class CommandCenterViewSet(viewsets.ModelViewSet):
+    pagination_class = CustomPagination
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ("cameras__channel_id", "cameras__location__name", "name")
+    permission_classes = (IsAuthenticated, DjangoModelPermissions)
+    queryset = CommandCenter.objects.filter()
+    http_method_names = ["get", "head", "options", "post", "put", "delete"]
+    lookup_field = "id32"
+
+    def get_serializer_class(self):
+        if self.action in ["create", "update"]:
+            return CommandCenterWriteSerializer
+        return CommandCenterReadSerializer

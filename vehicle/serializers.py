@@ -11,6 +11,7 @@ class VehicleTypeSerializer(serializers.ModelSerializer):
 
 
 class VehicleSerializer(serializers.ModelSerializer):
+    last_checkin = serializers.IntegerField()
     id32 = serializers.CharField(read_only=True)
     vehicle_type = serializers.SerializerMethodField()
     owner = serializers.SerializerMethodField()
@@ -30,7 +31,7 @@ class VehicleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Vehicle
-        fields = ("id32", "license_plate_number", "vehicle_type", "owner")
+        fields = ("id32", "license_plate_number", "vehicle_type", "owner", "last_checkin")
         read_only_fields = ("full_name", "no_id")
 
 

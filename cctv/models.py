@@ -82,3 +82,15 @@ class LPR(models.Model):
         from libs.moment import convert_timestamp_ms_to_date
 
         return convert_timestamp_ms_to_date(self.time_utc_timestamp)
+
+
+class CommandCenter(BaseModelGeneric):
+    name = models.CharField(max_length=250)
+    cameras = models.ManyToManyField(Camera)
+
+    def __str__(self) -> str:
+        return self.name
+
+    class Meta:
+        verbose_name = _("Command Center")
+        verbose_name_plural = _("Command Centers")
