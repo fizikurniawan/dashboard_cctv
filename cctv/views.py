@@ -20,6 +20,9 @@ class CameraFilterset(django_filters.FilterSet):
     is_active = django_filters.BooleanFilter(
         field_name="is_active", lookup_expr="exact"
     )
+    location_id32 = django_filters.CharFilter(
+        field_name="location__id32", lookup_expr="exact"
+    )
 
 
 class LPRFilterset(django_filters.FilterSet):
