@@ -56,18 +56,18 @@ class UserWriteSerializer(UserSerializer):
     def validate(self, attrs):
         instance = self.instance
         validated_data = super().validate(attrs)
-
+        username = validated_data.get("username")
         if not instance:
             if not validated_data["password"]:
                 raise serializers.ValidationError(
                     {"password": "this field is required"}
                 )
 
-            exists_email = User.objects.filter(username=validated_data["username"])
+            exists_email = User.objects.filter(username=username)
         else:
-            exists_email = User.objects.filter(
-                username=validated_data["username"]
-            ).exclude(id=instance.id)
+            exists_email = User.objects.filter(username=username).exclude(
+                id=instance.id
+            )
 
         if exists_email:
             raise serializers.ValidationError(
@@ -87,6 +87,21 @@ class UserWriteSerializer(UserSerializer):
         user_instance.groups.set([group])
         user_instance.save()
 
+        return user_instance
+
+    def update(self, user_instance, validated_data):
+        group = validated_data.pop("role", None)
+        password = validated_data.pop("password", None)
+
+        if password:
+            user_instance.set_password(password)
+
+        if group:
+            user_instance.groups.set([group])
+
+        for attr, value in validated_data.items():
+            setattr(user_instance, attr, value)
+        user_instance.save()
         return user_instance
 
     class Meta(UserSerializer.Meta):
