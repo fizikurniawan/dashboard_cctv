@@ -4,12 +4,17 @@ from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from libs.filter import CreatedAtFilterMixin
 from libs.pagination import CustomPagination
 from libs.resident import get_last_resident
-from .models import Resident
-from .serializers import ResidentReadSerializer, ResidentWriteSerializer
+from .models import Resident, Visitor
+from .serializers import (
+    ResidentReadSerializer,
+    ResidentWriteSerializer,
+    VisitorSerializer,
+)
 from django.core.files.base import ContentFile
 import base64
 from common.models import File
 from common.serializers import FileLiteSerializer
+from vehicle.models import Vehicle
 
 
 class ResidentViewSet(viewsets.ModelViewSet):
@@ -63,4 +68,41 @@ class ResidentViewSet(viewsets.ModelViewSet):
         }
         resident_dict["doc_type"] = doc_type_dict.get(resident_dict["doc_type"])
 
+        # get or create resident by no_id
+        resident = Resident.objects.filter(no_id=resident_dict["no_id"]).first()
+        if not resident:
+            resident_create_kwargs = resident_dict
+            resident_create_kwargs["photo"] = file_instance
+            resident = Resident.objects.create(**resident_dict)
+
+        vehicles = Vehicle.objects.filter(owner=resident)
+        vehicle_dict = [
+            {
+                "id32": vehicle.id32,
+                "license_plate_number": vehicle.license_plate_number,
+                "vehicle_type": {
+                    "id32": vehicle.vehicle_type.id32,
+                    "name": vehicle.vehicle_type.name,
+                },
+            }
+            for vehicle in vehicles
+        ]
+        resident_dict["resident"] = {
+            "id32": resident.id32,
+            "full_name": resident.full_name,
+        }
+        resident_dict["vehicles"] = vehicle_dict
+
         return response.Response(resident_dict)
+
+
+class VisitorViewSet(viewsets.ModelViewSet):
+    queryset = Visitor.objects.filter().order_by("-created_at")
+    pagination_class = CustomPagination
+    permission_classes = (IsAuthenticated, DjangoModelPermissions)
+    filterset_class = CreatedAtFilterMixin
+    filter_backends = (filters.SearchFilter, django_filters.DjangoFilterBackend)
+    search_fields = ("full_name", "no_id", "address")
+    http_method_names = ["get", "post", "head", "options"]
+    lookup_field = "id32"
+    serializer_class = VisitorSerializer
