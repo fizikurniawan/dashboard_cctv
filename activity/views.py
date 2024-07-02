@@ -31,6 +31,7 @@ class CheckInViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter, django_filters.DjangoFilterBackend)
     search_fields = (
         "person__full_name",
+        "person__no_id",
         "vehicle__license_plate_number",
         "vehicle__vehicle_type__name",
     )

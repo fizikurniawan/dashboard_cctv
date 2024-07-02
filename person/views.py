@@ -13,6 +13,12 @@ from common.serializers import FileLiteSerializer
 from vehicle.models import Vehicle
 
 
+class PersonFilterset(django_filters.FilterSet):
+    person_type = django_filters.CharFilter(
+        field_name="person_type", lookup_expr="exact"
+    )
+
+
 class PersonViewSet(viewsets.ModelViewSet):
     queryset = Person.objects.filter()
     pagination_class = CustomPagination
@@ -22,9 +28,10 @@ class PersonViewSet(viewsets.ModelViewSet):
     search_fields = ("full_name", "no_id", "address")
     http_method_names = ["get", "post", "put", "delete", "head", "options"]
     lookup_field = "id32"
+    filterset_class = PersonFilterset
 
     def get_serializer_class(self):
-        if self.action in ["create", "partial_update"]:
+        if self.action in ["create", "update"]:
             return PersonWriteSerializer
         return PersonReadSerializer
 

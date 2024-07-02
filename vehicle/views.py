@@ -16,8 +16,8 @@ from libs.csv import create_csv_file
 
 
 class VehicleFilter(CreatedAtFilterMixin):
-    owner_id32 = django_filters.CharFilter(
-        field_name="owner__id32", lookup_expr="exact"
+    person_id32 = django_filters.CharFilter(
+        field_name="person__id32", lookup_expr="exact"
     )
 
 

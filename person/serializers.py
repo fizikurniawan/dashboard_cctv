@@ -63,14 +63,14 @@ class PersonWriteSerializer(serializers.ModelSerializer):
 
         if not person:
             person = Person.objects.filter(no_id=validated_data["no_id"]).first()
-        else:
-            # update person data
-            for column in ["full_name", "address", "gender", "doc_type"]:
-                setattr(person, column, validated_data.get(column))
-            person.save()
 
         if not person:
             person = Person.objects.create(**validated_data)
+        else:
+            # update person data
+            for column in ["full_name", "address", "gender", "doc_type", "person_type"]:
+                setattr(person, column, validated_data.get(column))
+            person.save()
 
         # get vehicle
         vehicle_instance, _ = Vehicle.objects.get_or_create(**vehicle, person=person)

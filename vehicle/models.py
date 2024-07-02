@@ -30,15 +30,14 @@ class Vehicle(BaseModelGeneric):
 
     @property
     def last_checkin(self):
-        from cctv.models import LPR
-        from activity.models import Checkin
+        from activity.models import CheckIn, LPR
 
         last_check_in_ts = 0
         activity_check_in_ts = (
-            Checkin.objects.filter(vehicle=self).order_by("-check_in_ts").frist()
+            CheckIn.objects.filter(vehicle=self).order_by("-check_in_timestamp").frist()
         )
         if activity_check_in_ts:
-            last_check_in_ts = activity_check_in_ts.check_in_ts
+            last_check_in_ts = activity_check_in_ts.check_in_timestamp
 
         lpr_check_in_ts = (
             LPR.objects.filter(
