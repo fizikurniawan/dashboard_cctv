@@ -43,9 +43,7 @@ class PersonViewSet(viewsets.ModelViewSet):
         # get or create person by no_id
         person = Person.objects.filter(no_id=person_dict["no_id"]).first()
         if not person:
-            person_create_kwargs = person_dict
-            person_create_kwargs["photo"] = file_instance
-            person = Person.objects.create(**person_dict)
+            person = Person.objects.create(**person_dict, photo=file_instance)
 
         vehicles = Vehicle.objects.filter(person=person)
         vehicle_dict = [
@@ -74,7 +72,13 @@ class PersonViewSet(viewsets.ModelViewSet):
                 "text": "Female",
             },
         }
-        person_dict["gender"] = gender_dict.get(person_dict["gender"])
+        person_dict["gender"] = gender_dict.get(
+            person_dict["gender"],
+            {
+                "value": person_dict["gender"],
+                "text": None,
+            },
+        )
 
         doc_type_dict = {
             "DL": {
@@ -90,6 +94,12 @@ class PersonViewSet(viewsets.ModelViewSet):
                 "text": "Weekly Pass",
             },
         }
-        person_dict["doc_type"] = doc_type_dict.get(person_dict["doc_type"])
+        person_dict["doc_type"] = doc_type_dict.get(
+            person_dict["doc_type"],
+            {
+                "value": person_dict["doc_type"],
+                "text": None,
+            },
+        )
 
         return response.Response(person_dict)
