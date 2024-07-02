@@ -40,6 +40,30 @@ class PersonViewSet(viewsets.ModelViewSet):
         else:
             person_dict["photo"] = None
 
+        # get or create person by no_id
+        person = Person.objects.filter(no_id=person_dict["no_id"]).first()
+        if not person:
+            person_create_kwargs = person_dict
+            person_create_kwargs["photo"] = file_instance
+            person = Person.objects.create(**person_dict)
+
+        vehicles = Vehicle.objects.filter(person=person)
+        vehicle_dict = [
+            {
+                "id32": vehicle.id32,
+                "license_plate_number": vehicle.license_plate_number,
+                "vehicle_type": {
+                    "id32": vehicle.vehicle_type.id32,
+                    "name": vehicle.vehicle_type.name,
+                },
+            }
+            for vehicle in vehicles
+        ]
+        person_dict["person"] = {
+            "id32": person.id32,
+            "full_name": person.full_name,
+        }
+        person_dict["vehicles"] = vehicle_dict
         gender_dict = {
             0: {
                 "value": 0,
@@ -61,32 +85,11 @@ class PersonViewSet(viewsets.ModelViewSet):
                 "value": "ML",
                 "text": "Monthly Pass",
             },
+            "WL": {
+                "value": "WL",
+                "text": "Weekly Pass",
+            },
         }
         person_dict["doc_type"] = doc_type_dict.get(person_dict["doc_type"])
-
-        # get or create resident by no_id
-        resident = Person.objects.filter(no_id=person_dict["no_id"]).first()
-        if not resident:
-            resident_create_kwargs = person_dict
-            resident_create_kwargs["photo"] = file_instance
-            resident = Person.objects.create(**person_dict)
-
-        vehicles = Vehicle.objects.filter(owner=resident)
-        vehicle_dict = [
-            {
-                "id32": vehicle.id32,
-                "license_plate_number": vehicle.license_plate_number,
-                "vehicle_type": {
-                    "id32": vehicle.vehicle_type.id32,
-                    "name": vehicle.vehicle_type.name,
-                },
-            }
-            for vehicle in vehicles
-        ]
-        person_dict["resident"] = {
-            "id32": resident.id32,
-            "full_name": resident.full_name,
-        }
-        person_dict["vehicles"] = vehicle_dict
 
         return response.Response(person_dict)
