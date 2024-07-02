@@ -43,7 +43,9 @@ class PersonViewSet(viewsets.ModelViewSet):
         # get or create person by no_id
         person = Person.objects.filter(no_id=person_dict["no_id"]).first()
         if not person:
-            person = Person.objects.create(**person_dict, photo=file_instance)
+            person_create_kwargs = person_dict.copy()
+            person_create_kwargs["photo"] = file_instance
+            person = Person.objects.create(**person_create_kwargs)
 
         vehicles = Vehicle.objects.filter(person=person)
         vehicle_dict = [
