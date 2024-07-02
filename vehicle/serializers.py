@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Vehicle, VehicleType, Resident
+from .models import Vehicle, VehicleType, Person
 
 
 class VehicleTypeSerializer(serializers.ModelSerializer):
@@ -14,35 +14,41 @@ class VehicleSerializer(serializers.ModelSerializer):
     last_checkin = serializers.IntegerField(read_only=True)
     id32 = serializers.CharField(read_only=True)
     vehicle_type = serializers.SerializerMethodField()
-    owner = serializers.SerializerMethodField()
+    person = serializers.SerializerMethodField()
 
     def get_vehicle_type(self, instance):
         return VehicleTypeSerializer(instance.vehicle_type).data
 
-    def get_owner(self, instance):
-        if not instance.owner:
+    def get_person(self, instance):
+        if not instance.person:
             return
-        
+
         return {
-            "full_name": instance.owner.full_name,
-            "no_id": instance.owner.no_id,
-            "id32": instance.owner.id32,
+            "full_name": instance.person.full_name,
+            "no_id": instance.person.no_id,
+            "id32": instance.person.id32,
         }
 
     class Meta:
         model = Vehicle
-        fields = ("id32", "license_plate_number", "vehicle_type", "owner", "last_checkin")
+        fields = (
+            "id32",
+            "license_plate_number",
+            "vehicle_type",
+            "person",
+            "last_checkin",
+        )
         read_only_fields = ("full_name", "no_id", "last_checkin")
 
 
 class VehicleWriteSerializer(VehicleSerializer):
     vehicle_type = serializers.CharField()
-    owner = serializers.CharField()
+    person = serializers.CharField()
 
-    def validate_owner(self, data):
-        instance = Resident.objects.filter(id32=data).last()
+    def validate_person(self, data):
+        instance = Person.objects.filter(id32=data).last()
         if not instance:
-            raise serializers.ValidationError("invalid owner")
+            raise serializers.ValidationError("invalid person")
         return instance
 
     def validate_vehicle_type(self, data):

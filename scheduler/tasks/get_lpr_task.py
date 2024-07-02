@@ -2,7 +2,8 @@ import re
 from libs.eocortex import EocortexManager
 from libs.moment import convert_timeutc_to_timestamp
 from datetime import datetime
-from cctv.models import Camera, LPR, Vehicle
+from cctv.models import Camera
+from activity.models import LPR, Vehicle
 
 
 def format_numberplate(numberplate):

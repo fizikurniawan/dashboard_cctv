@@ -1,7 +1,5 @@
 from rest_framework import serializers
-from .models import Camera, LPR, Location, CommandCenter
-from django.conf import settings
-from vehicle.serializers import VehicleSerializer
+from .models import Camera, Location, CommandCenter
 
 
 class LocationSerializer(serializers.ModelSerializer):
@@ -60,25 +58,6 @@ class CameraSerializer(serializers.ModelSerializer):
         read_only_fields = ("id32", "hls_url")
 
 
-class LPRSerializer(serializers.ModelSerializer):
-    camera = serializers.SerializerMethodField()
-    vehicle = serializers.SerializerMethodField()
-
-    def get_camera(self, instance):
-        if not instance.camera:
-            return
-        return {"id32": instance.camera.id32, "name": instance.camera.name}
-
-    def get_vehicle(self, instance):
-        if not instance.vehicle:
-            return
-        return VehicleSerializer(instance.vehicle).data
-
-    class Meta:
-        model = LPR
-        fields = "__all__"
-
-
 class CommandCenterReadSerializer(serializers.ModelSerializer):
     cameras = serializers.SerializerMethodField()
 
@@ -131,4 +110,4 @@ class CommandCenterWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = CommandCenter
         fields = ("id32", "name", "cameras")
-        read_only_fields = ("id32", )
+        read_only_fields = ("id32",)

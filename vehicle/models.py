@@ -1,7 +1,7 @@
 from django.db import models
 from libs.base_model import BaseModelGeneric
 from django.utils.translation import gettext_lazy as _
-from resident.models import Resident
+from person.models import Person
 
 
 class VehicleType(BaseModelGeneric):
@@ -20,22 +20,39 @@ class Vehicle(BaseModelGeneric):
     vehicle_type = models.ForeignKey(
         VehicleType, on_delete=models.SET_NULL, null=True, blank=True
     )
-    owner = models.ForeignKey(
-        Resident, on_delete=models.SET_NULL, null=True, blank=True
+    person = models.ForeignKey(
+        Person,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="%(app_label)s_%(class)s_person",
     )
 
     @property
     def last_checkin(self):
         from cctv.models import LPR
+        from activity.models import Checkin
 
-        instance = (
-            LPR.objects.filter(vehicle=self, direction__iexact="in")
+        last_check_in_ts = 0
+        activity_check_in_ts = (
+            Checkin.objects.filter(vehicle=self).order_by("-check_in_ts").frist()
+        )
+        if activity_check_in_ts:
+            last_check_in_ts = activity_check_in_ts.check_in_ts
+
+        lpr_check_in_ts = (
+            LPR.objects.filter(
+                vehicle=self,
+                direction__iexact="in",
+                time_utc_timestamp__gt=last_check_in_ts,
+            )
             .order_by("-time_utc_timestamp")
             .first()
         )
-        if not instance:
-            return
-        return instance.time_utc_timestamp
+        if lpr_check_in_ts:
+            last_check_in_ts = lpr_check_in_ts.time_utc_timestamp
+
+        return last_check_in_ts
 
     @property
     def last_checkin_str(self):
@@ -44,7 +61,7 @@ class Vehicle(BaseModelGeneric):
         ts = self.last_checkin
         if not ts:
             return
-        dt = datetime.fromtimestamp(ts/1000)
+        dt = datetime.fromtimestamp(ts / 1000)
         formatted_string = dt.strftime("%d %b %Y %H:%M:%S")
 
         return formatted_string

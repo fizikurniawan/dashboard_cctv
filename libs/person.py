@@ -1,7 +1,7 @@
 from libs import db
 
 
-def get_last_resident():
+def get_last_person():
     cursor = db.get_vms_system_connection()
     sql = """SELECT
         LVName AS full_name,

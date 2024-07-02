@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     "common",
     "cctv",
     "resident",
+    "person",
+    "activity",
     "scheduler",
     "vehicle",
     "rest_framework",

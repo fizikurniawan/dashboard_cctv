@@ -22,7 +22,8 @@ from drf_yasg import openapi
 from common.router import router as common_router
 from cctv.router import router as cctv_router
 from vehicle.router import router as vehicle_router
-from resident.router import router as resident_router
+from person.router import router as person_router
+from activity.router import router as activity_router
 from user.router import router as user_router
 from auth.router import router as auth_router
 from django.conf.urls.i18n import i18n_patterns
@@ -47,7 +48,8 @@ urlpatterns = [
     path("api/common/", include(common_router.urls)),
     path("api/cctv/", include(cctv_router.urls)),
     path("api/vehicle/", include(vehicle_router.urls)),
-    path("api/resident/", include(resident_router.urls)),
+    path("api/person/", include(person_router.urls)),
+    path("api/activity/", include(activity_router.urls)),
     path("api/user/", include(user_router.urls)),
     path("i18n/setlang/", set_language, name="set_language"),
     path("i18n/setlang/", set_language, name="set_language"),

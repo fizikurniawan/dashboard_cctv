@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from libs.filter import CreatedAtFilterMixin
 from libs.pagination import CustomPagination
 from .models import Vehicle, VehicleType
-from cctv.models import LPR
+from activity.models import LPR
 from .serializers import (
     VehicleSerializer,
     VehicleWriteSerializer,

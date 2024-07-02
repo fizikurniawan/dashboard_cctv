@@ -1,10 +1,10 @@
 from rest_framework import viewsets, filters, decorators, response
 from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from libs.pagination import CustomPagination
-from .models import Camera, LPR, Location, CommandCenter
+from .models import Camera, Location, CommandCenter
+from activity.models import LPR
 from .serializers import (
     CameraSerializer,
-    LPRSerializer,
     LocationSerializer,
     CommandCenterReadSerializer,
     CommandCenterWriteSerializer,
@@ -23,10 +23,6 @@ class CameraFilterset(django_filters.FilterSet):
     location_id32 = django_filters.CharFilter(
         field_name="location__id32", lookup_expr="exact"
     )
-
-
-class LPRFilterset(django_filters.FilterSet):
-    channel_id = django_filters.CharFilter(field_name="channel_id", lookup_expr="exact")
 
 
 class LocationViewSet(viewsets.ModelViewSet):
@@ -76,22 +72,6 @@ class CameraViewSet(viewsets.ModelViewSet):
         return response.Response(
             {"total_movement": total_movement, "total_visitor": total_visitor}
         )
-
-
-class LPRViewSet(viewsets.ModelViewSet):
-    pagination_class = CustomPagination
-    filter_backends = (filters.SearchFilter, django_filters.DjangoFilterBackend)
-    search_fields = (
-        "number_plate",
-        "vehicle__owner__full_name",
-        "vehicle__owner__no_id",
-    )
-    permission_classes = (IsAuthenticated, DjangoModelPermissions)
-    queryset = LPR.objects.filter()
-    http_method_names = ["get", "head", "options"]
-    serializer_class = LPRSerializer
-    lookup_field = "uuid"
-    filterset_class = LPRFilterset
 
 
 class CommandCenterViewSet(viewsets.ModelViewSet):
