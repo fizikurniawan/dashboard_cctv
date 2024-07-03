@@ -56,3 +56,12 @@ class VehicleWriteSerializer(VehicleSerializer):
         if not instance:
             raise serializers.ValidationError("invalid vehicle type")
         return instance
+
+class VehicleLiteSerializer(serializers.ModelSerializer):
+    vehicle_type = serializers.SerializerMethodField()
+
+    def get_vehicle_type(self, instance):
+        return VehicleTypeSerializer(instance.vehicle_type).data
+    class Meta:
+        model = Vehicle
+        fields = ("id32", "license_plate_number", "vehicle_type")

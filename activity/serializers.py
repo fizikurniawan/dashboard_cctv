@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from vehicle.serializers import VehicleSerializer
+from vehicle.serializers import VehicleSerializer, VehicleLiteSerializer
 from .models import LPR, CheckIn
 from person.serializers import PersonReadSerializer
 from django.shortcuts import get_object_or_404
@@ -27,15 +27,27 @@ class LPRSerializer(serializers.ModelSerializer):
 
 class CheckInSerializer(serializers.ModelSerializer):
     person = serializers.SerializerMethodField()
+    vehicle = serializers.SerializerMethodField()
 
     def get_person(self, instance):
         if not instance.person:
             return
         return PersonReadSerializer(instance.person).data
 
+    def get_vehicle(self, instance):
+        if not instance.vehicle:
+            return
+        return VehicleLiteSerializer(instance.vehicle).data
+
     class Meta:
         model = CheckIn
-        fields = ("id32", "person", "check_in_timestamp", "check_out_timestamp")
+        fields = (
+            "id32",
+            "person",
+            "check_in_timestamp",
+            "check_out_timestamp",
+            "vehicle",
+        )
 
 
 class CheckOutSerializer(serializers.Serializer):
