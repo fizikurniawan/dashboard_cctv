@@ -27,7 +27,9 @@ class Person(BaseModelGeneric):
     gender = models.IntegerField(choices=GENDER_CHOICES)
     address = models.TextField()
     photo = models.ForeignKey(File, on_delete=models.SET_NULL, null=True, blank=True)
-    doc_type = models.CharField(max_length=10, choices=DOC_TYPE_CHOICES)
+    doc_type = models.CharField(
+        max_length=10, choices=DOC_TYPE_CHOICES, null=True, blank=True
+    )
     person_type = models.CharField(
         max_length=10, choices=PERSON_TYPE_CHOICES, null=True, blank=True
     )
@@ -48,6 +50,8 @@ class Person(BaseModelGeneric):
 
     @property
     def doc_type_dict(self):
+        if not self.doc_type:
+            return
         return {
             "value": self.doc_type,
             "text": dict(self.DOC_TYPE_CHOICES).get(self.doc_type, ""),

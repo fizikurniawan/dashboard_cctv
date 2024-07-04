@@ -7,6 +7,12 @@ from django.utils.translation import gettext_lazy as _
 
 
 class CheckIn(BaseModelGeneric):
+    PURPOSE_OF_VISIT_CHOICES = (
+        ("rapat", "Rapat"),
+        ("melakukan-pekerjaan", "Melakukan Pekerjaan"),
+        ("berkunjung", "Berkunjung"),
+        ("patroli", "Patroli"),
+    )
     person = models.ForeignKey(
         Person,
         on_delete=models.SET_NULL,
@@ -23,6 +29,18 @@ class CheckIn(BaseModelGeneric):
     )
     check_in_timestamp = models.BigIntegerField()
     check_out_timestamp = models.BigIntegerField(null=True, blank=True)
+    purpose_of_visit = models.CharField(
+        choices=PURPOSE_OF_VISIT_CHOICES, max_length=50, default="berkunjung"
+    )
+
+    @property
+    def purpose_of_visit_dict(self):
+        return {
+            "value": self.purpose_of_visit,
+            "text": dict(self.PURPOSE_OF_VISIT_CHOICES).get(
+                self.purpose_of_visit, self.purpose_of_visit
+            ),
+        }
 
     class Meta:
         verbose_name = _("CheckIn")

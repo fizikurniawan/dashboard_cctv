@@ -34,7 +34,7 @@ class Vehicle(BaseModelGeneric):
 
         last_check_in_ts = 0
         activity_check_in_ts = (
-            CheckIn.objects.filter(vehicle=self).order_by("-check_in_timestamp").frist()
+            CheckIn.objects.filter(vehicle=self).order_by("-check_in_timestamp").first()
         )
         if activity_check_in_ts:
             last_check_in_ts = activity_check_in_ts.check_in_timestamp
@@ -51,7 +51,7 @@ class Vehicle(BaseModelGeneric):
         if lpr_check_in_ts:
             last_check_in_ts = lpr_check_in_ts.time_utc_timestamp
 
-        return last_check_in_ts
+        return last_check_in_ts if last_check_in_ts else None
 
     @property
     def last_checkin_str(self):

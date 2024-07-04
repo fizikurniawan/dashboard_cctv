@@ -6,7 +6,8 @@ from rest_framework.views import APIView
 from libs.pagination import CustomPagination
 from ..models import File, Configuration
 from ..serializers.configuration import ConfigurationSerializer
-from ..serializers import FileCreateSerializer, MeSerializer
+from ..serializers import FileCreateSerializer, MeSerializer, ValueStrTextSerializer
+from activity.models import CheckIn
 
 
 class CustomAuthToken(ObtainAuthToken):
@@ -55,3 +56,12 @@ class ConfigurationViewSet(viewsets.ModelViewSet):
         if key is not None:
             queryset = queryset.filter(key=key)
         return queryset
+
+
+class PurposeOfVisitViewSet(viewsets.GenericViewSet, viewsets.mixins.ListModelMixin):
+    queryset = [
+        {"text": i[1], "value": i[0]}
+        for i in dict(CheckIn.PURPOSE_OF_VISIT_CHOICES).items()
+    ]
+    pagination_class = CustomPagination
+    serializer_class = ValueStrTextSerializer

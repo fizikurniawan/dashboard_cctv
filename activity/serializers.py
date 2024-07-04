@@ -28,6 +28,7 @@ class LPRSerializer(serializers.ModelSerializer):
 class CheckInSerializer(serializers.ModelSerializer):
     person = serializers.SerializerMethodField()
     vehicle = serializers.SerializerMethodField()
+    purpose_of_visit = serializers.SerializerMethodField()
 
     def get_person(self, instance):
         if not instance.person:
@@ -39,6 +40,9 @@ class CheckInSerializer(serializers.ModelSerializer):
             return
         return VehicleLiteSerializer(instance.vehicle).data
 
+    def get_purpose_of_visit(self, instance):
+        return instance.purpose_of_visit_dict
+
     class Meta:
         model = CheckIn
         fields = (
@@ -47,6 +51,7 @@ class CheckInSerializer(serializers.ModelSerializer):
             "check_in_timestamp",
             "check_out_timestamp",
             "vehicle",
+            "purpose_of_visit",
         )
 
 

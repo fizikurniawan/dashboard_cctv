@@ -47,6 +47,7 @@ class PersonWriteSerializer(serializers.ModelSerializer):
     vehicle = VehicleLiteSerializer()
     person = serializers.CharField(required=False, allow_null=True)
     person_type = serializers.CharField()
+    purpose_of_visit = serializers.CharField(required=False, allow_null=True)
 
     def validate_person(self, data):
         if not data:
@@ -55,6 +56,13 @@ class PersonWriteSerializer(serializers.ModelSerializer):
         if not person_instance:
             raise serializers.ValidationError("invalid person")
         return person_instance
+
+    def validate(self, attrs):
+        if attrs["person_type"] == Person.VISITOR and not attrs.get("purpose_of_visit"):
+            raise serializers.ValidationError(
+                {"purpose_of_visit": "this field is required"}
+            )
+        return super().validate(attrs)
 
     def create(self, validated_data):
         person = validated_data.pop("person", None)
@@ -81,6 +89,7 @@ class PersonWriteSerializer(serializers.ModelSerializer):
                 person=person,
                 check_in_timestamp=int(time() * 1000),
                 vehicle=vehicle_instance,
+                purpose_of_visit=validated_data["purpose_of_visit"],
             )
 
         return person
@@ -98,6 +107,7 @@ class PersonWriteSerializer(serializers.ModelSerializer):
             "person_type",
             "person",
             "created_at",
+            "purpose_of_visit",
         )
-        write_only_fields = ("vehicle", "person")
+        write_only_fields = ("vehicle", "person", "purpose_of_visit")
         read_only_fields = ("id32", "created_at")

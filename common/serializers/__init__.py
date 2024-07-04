@@ -87,3 +87,8 @@ class MeSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("first_name", "last_name", "email", "is_active")
+
+
+class ValueStrTextSerializer(serializers.Serializer):
+    value = serializers.CharField()
+    text = serializers.CharField()

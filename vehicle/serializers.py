@@ -11,10 +11,10 @@ class VehicleTypeSerializer(serializers.ModelSerializer):
 
 
 class VehicleSerializer(serializers.ModelSerializer):
-    last_checkin = serializers.IntegerField(read_only=True)
     id32 = serializers.CharField(read_only=True)
     vehicle_type = serializers.SerializerMethodField()
     person = serializers.SerializerMethodField()
+    last_checkin_timestamp = serializers.SerializerMethodField()
 
     def get_vehicle_type(self, instance):
         return VehicleTypeSerializer(instance.vehicle_type).data
@@ -28,6 +28,8 @@ class VehicleSerializer(serializers.ModelSerializer):
             "no_id": instance.person.no_id,
             "id32": instance.person.id32,
         }
+    def get_last_checkin_timestamp(self, instance):
+        return instance.last_checkin
 
     class Meta:
         model = Vehicle
@@ -36,9 +38,9 @@ class VehicleSerializer(serializers.ModelSerializer):
             "license_plate_number",
             "vehicle_type",
             "person",
-            "last_checkin",
+            "last_checkin_timestamp",
         )
-        read_only_fields = ("full_name", "no_id", "last_checkin")
+        read_only_fields = ("full_name", "no_id", "last_checkin_timestamp")
 
 
 class VehicleWriteSerializer(VehicleSerializer):
