@@ -68,6 +68,7 @@ class PersonWriteSerializer(serializers.ModelSerializer):
         person = validated_data.pop("person", None)
         vehicle = validated_data.pop("vehicle")
         person_type = validated_data.get("person_type", None)
+        purpose_of_visit = validated_data.pop("purpose_of_visit", None)
 
         if not person:
             person = Person.objects.filter(no_id=validated_data["no_id"]).first()
@@ -89,7 +90,7 @@ class PersonWriteSerializer(serializers.ModelSerializer):
                 person=person,
                 check_in_timestamp=int(time() * 1000),
                 vehicle=vehicle_instance,
-                purpose_of_visit=validated_data["purpose_of_visit"],
+                purpose_of_visit=purpose_of_visit,
             )
 
         return person
