@@ -13,11 +13,7 @@ class LPRFilterset(django_filters.FilterSet):
 class LPRViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPagination
     filter_backends = (filters.SearchFilter, django_filters.DjangoFilterBackend)
-    search_fields = (
-        "number_plate",
-        "vehicle__owner__full_name",
-        "vehicle__owner__no_id",
-    )
+    search_fields = ("number_plate",)
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
     queryset = LPR.objects.filter()
     http_method_names = ["get", "head", "options"]

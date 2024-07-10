@@ -3,7 +3,7 @@ import json
 import base64
 from datetime import datetime
 from common.models import Configuration
-
+from cctv.models import Camera
 
 class EocortexManager(object):
     def __init__(self) -> None:
@@ -32,6 +32,51 @@ class EocortexManager(object):
         url = self.base_url + "/api/cars"
         response = requests.get(url, headers=self.get_credentials())
         return response.json()
+
+    def get_result_lpr_v2(
+        self, start_ts: datetime, end_ts: datetime
+    ) -> dict:
+        url = self.base_url + "/archive_events"
+        start_time = start_ts.strftime("%Y-%m-%d-%H-%M-%S-%f")
+        start_time = start_ts.strftime("%d.%m.%y %H:%M:%S.%f")
+        finish_time = end_ts.strftime("%d.%m.%y %H:%M:%S.%f")
+
+        def get_3_ms(ts_str):
+            date_time_parts = ts_str.split("-")
+            date_time_parts[-1] = date_time_parts[-1][:3]
+            return "-".join(date_time_parts)
+
+        start_time = get_3_ms(start_time)
+        finish_time = get_3_ms(finish_time)
+        body = {
+            "startTimeUtc": "01.03.2024 12:56:37.000",
+            "endTimeUtc": "10.07.2024 13:56:37.434",
+            "cameraIds": [
+                i.channel_id for i in Camera.objects.filter()
+            ],
+            "eventCategories": [0, 1, 2],
+            "eventInitiatorTypes": [0, 2, 8, 4, 1, 3],
+            "eventInitiators": ["91baab3e-ef9d-48c6-b803-2e70f4475960"],
+            "eventIds": [
+                "5a692f4d-bf82-49cd-ae72-5de4660b8bfb",
+                "c9d6d086-c965-4cf8-aef6-85b3894e3a4a",
+            ],
+            "isSearchFromBegin": False,
+            "searchLimitCount": 200,
+        }
+
+        try:
+            response = requests.post(url, json=body, headers={"Authorization": "Basic cm9vdDo="})
+            response.raise_for_status()
+
+            try:
+                return response.json()
+            except json.JSONDecodeError:
+                response.encoding = "utf-8-sig"
+                return response.json()
+
+        except Exception as e:
+            print("Request failed:", e)
 
     def get_result_lpr(
         self, start_ts: datetime, end_ts: datetime, channelId: str

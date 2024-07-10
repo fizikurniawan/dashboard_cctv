@@ -1,7 +1,7 @@
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timedelta
 
-from .tasks.get_lpr_task import get_lpr_task
+from .tasks.get_lpr_task_v2 import get_lpr_task
 
 
 def run_schedulers():
