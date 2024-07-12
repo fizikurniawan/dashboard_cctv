@@ -39,7 +39,7 @@ def get_lpr_task(start_ts: datetime, end_ts: datetime):
     em = EocortexManager()
 
     try:
-        lpr_results = em.get_result_lpr_v2(start_ts, end_ts)
+        lpr_results = em.get_specialarchiveevents(start_ts, end_ts)
     except Exception as err:
         lpr_results = []
         print(
@@ -60,21 +60,14 @@ def get_lpr_task(start_ts: datetime, end_ts: datetime):
         if not camera:
             camera = Camera.objects.create(name=camera_name, channel_id=channel_id)
 
-        number_plates_recognized = result["EventComment"]
-        extracted_number_plate = extract_number_plate(number_plates_recognized)
-
-        if not extracted_number_plate:
-            continue
-
-        number_plate_parsed = format_numberplate(extracted_number_plate)
+        number_plates_recognized = result["Numberplate"]
+        number_plate_parsed = format_numberplate(number_plates_recognized)
         exists_vehicle = Vehicle.objects.filter(
             license_plate_number=number_plate_parsed
         ).last()
 
         time_utc_ts = int(
-            datetime.fromisoformat(
-                result["Timestamp"].replace("Z", "+00:00")
-            ).timestamp()
+            datetime.strptime(result["Timestamp"], "%d.%m.%Y %H.%M.%S").timestamp()
             * 1000
         )
 
@@ -83,6 +76,7 @@ def get_lpr_task(start_ts: datetime, end_ts: datetime):
             "direction": "Unknown",
             "time_utc_timestamp": time_utc_ts,
             "channel_id": channel_id,
+            "direction": result["direction"],
         }
 
         # Define the defaults for creation or update

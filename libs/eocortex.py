@@ -134,3 +134,45 @@ class EocortexManager(object):
         data = json.loads(json_part)
 
         return data
+
+    def get_specialarchiveevents(
+        self,
+        start_ts: datetime,
+        end_ts: datetime,
+        eventid: str = "c9d6d086-c965-4cf8-aef6-85b3894e3a4a",
+    ):
+        url = self.base_url + "/specialarchiveevents"
+        start_time = start_ts.strftime("%d.%m.%Y %H:%M:%S")
+        finish_time = end_ts.strftime("%d.%m.%Y %H:%M:%S")
+        params = {
+            "login": "root",
+            "password": None,
+            "responsetype": "json",
+            "eventid": eventid,
+            "starttime": start_time,
+            "endtime": finish_time,
+        }
+        response = requests.get(url, params=params)
+
+        content_text = response.content.decode("utf-8-sig")
+        if response.status_code != 200:
+            raise Exception(content_text)
+
+        # remove all unneded text
+        content_text = content_text.replace("\r\n\t", "").replace("\r\n", "")
+        json_strings = content_text.split("}{")
+        json_strings = [
+            s + "}" if not s.endswith("}") else "{" + s for s in json_strings
+        ]
+
+        json_object = []
+        for s in json_strings:
+            json_st = s
+            if not s.endswith("}"):
+                json_st = json_st + "}"
+
+            if not s.startswith("{"):
+                json_st = "{" + json_st
+            json_object.append(json.loads(json_st))
+
+        return json_object

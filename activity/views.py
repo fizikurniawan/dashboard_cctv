@@ -15,7 +15,7 @@ class LPRViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter, django_filters.DjangoFilterBackend)
     search_fields = ("number_plate",)
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
-    queryset = LPR.objects.filter()
+    queryset = LPR.objects.filter().order_by('-time_utc_timestamp')
     http_method_names = ["get", "head", "options"]
     serializer_class = LPRSerializer
     lookup_field = "uuid"
