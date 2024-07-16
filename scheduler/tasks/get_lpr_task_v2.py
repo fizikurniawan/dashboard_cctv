@@ -54,36 +54,38 @@ def get_lpr_task(start_ts: datetime, end_ts: datetime):
         )
 
     for result in lpr_results:
-        channel_id = result["ChannelId"]
-        camera_name = result["ChannelName"]
-        camera = Camera.objects.filter(channel_id=channel_id).first()
-        if not camera:
-            camera = Camera.objects.create(name=camera_name, channel_id=channel_id)
+        print({"action": "Insert LPR to DB", "result": result})
 
-        number_plates_recognized = result["Numberplate"]
-        number_plate_parsed = format_numberplate(number_plates_recognized)
-        exists_vehicle = Vehicle.objects.filter(
-            license_plate_number=number_plate_parsed
-        ).last()
-
-        time_utc_ts = int(
-            datetime.strptime(result["Timestamp"], "%d.%m.%Y %H.%M.%S").timestamp()
-            * 1000
-        )
-
-        search_criteria = {
-            "number_plate": number_plate_parsed,
-            "direction": "Unknown",
-            "time_utc_timestamp": time_utc_ts,
-            "channel_id": channel_id,
-            "direction": result["direction"],
-        }
-
-        # Define the defaults for creation or update
-        defaults = {"camera": camera, "vehicle": exists_vehicle}
-
-        # Use update_or_create to find and update, or create a new entry
         try:
+            channel_id = result["ChannelId"]
+            camera_name = result["ChannelName"]
+            camera = Camera.objects.filter(channel_id=channel_id).first()
+            if not camera:
+                camera = Camera.objects.create(name=camera_name, channel_id=channel_id)
+
+            number_plates_recognized = result["Numberplate"]
+            number_plate_parsed = format_numberplate(number_plates_recognized)
+            exists_vehicle = Vehicle.objects.filter(
+                license_plate_number=number_plate_parsed
+            ).last()
+
+            time_utc_ts = int(
+                datetime.strptime(result["Timestamp"], "%d.%m.%Y %H.%M.%S").timestamp()
+                * 1000
+            )
+
+            search_criteria = {
+                "number_plate": number_plate_parsed,
+                "direction": "Unknown",
+                "time_utc_timestamp": time_utc_ts,
+                "channel_id": channel_id,
+                "direction": result["direction"],
+            }
+
+            # Define the defaults for creation or update
+            defaults = {"camera": camera, "vehicle": exists_vehicle}
+
+            # Use update_or_create to find and update, or create a new entry
             LPR.objects.update_or_create(defaults=defaults, **search_criteria)
         except Exception as err:
             print(

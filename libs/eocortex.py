@@ -161,9 +161,6 @@ class EocortexManager(object):
         # remove all unneded text
         content_text = content_text.replace("\r\n\t", "").replace("\r\n", "")
         json_strings = content_text.split("}{")
-        json_strings = [
-            s + "}" if not s.endswith("}") else "{" + s for s in json_strings
-        ]
 
         json_object = []
         for s in json_strings:
@@ -174,5 +171,14 @@ class EocortexManager(object):
             if not s.startswith("{"):
                 json_st = "{" + json_st
             json_object.append(json.loads(json_st))
+
+        print(
+            {
+                "action": "LOG",
+                "action": "response eocortex",
+                "raw_resp": response.content,
+                "parse_json": json_object,
+            }
+        )
 
         return json_object
