@@ -7,7 +7,7 @@ from .tasks.get_lpr_task_v2 import get_lpr_task
 def run_schedulers():
     scheduler = BackgroundScheduler()
 
-    start_ts = datetime.now() - timedelta(hours=2)
+    start_ts = datetime.now() - timedelta(hours=5)
     end_ts = datetime.now()
     scheduler.add_job(get_lpr_task, "interval", [start_ts, end_ts], minutes=5)
     scheduler.start()

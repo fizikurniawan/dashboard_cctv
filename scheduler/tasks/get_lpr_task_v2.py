@@ -35,7 +35,7 @@ def format_numberplate(numberplate):
 
 
 def get_lpr_task(start_ts: datetime, end_ts: datetime):
-    print("running get_lpr_task_v2.....")
+    print("running get_lpr_task_v2 at ", datetime.now())
     em = EocortexManager()
 
     try:

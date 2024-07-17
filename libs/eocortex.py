@@ -170,6 +170,9 @@ class EocortexManager(object):
 
             if not s.startswith("{"):
                 json_st = "{" + json_st
+            
+            if json_st == "{}":
+                continue
             json_object.append(json.loads(json_st))
 
         print(
