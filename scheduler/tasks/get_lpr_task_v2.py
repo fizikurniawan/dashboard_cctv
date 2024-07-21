@@ -1,7 +1,7 @@
 import re
 import traceback
 from libs.eocortex import EocortexManager
-from datetime import datetime
+from datetime import datetime, timedelta
 from cctv.models import Camera
 from activity.models import LPR, Vehicle
 
@@ -34,9 +34,14 @@ def format_numberplate(numberplate):
     return f"{cleaned_numberplate[0]}-{cleaned_numberplate[1:i + 1]}-{cleaned_numberplate[i + 1:]}"
 
 
-def get_lpr_task(start_ts: datetime, end_ts: datetime):
+def get_lpr_task():
     print("running get_lpr_task_v2 at ", datetime.now())
     em = EocortexManager()
+
+    start_ts = datetime.now() - timedelta(hours=5)
+    end_ts = datetime.now()
+
+    print({"action": "getting eocortext", "start_ts": start_ts, "end_ts": end_ts})
 
     try:
         lpr_results = em.get_specialarchiveevents(start_ts, end_ts)
