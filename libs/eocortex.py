@@ -10,6 +10,7 @@ from django.conf import settings
 EOCORTEX_USER = getattr(settings, "EOCORTEX_USER", "root")
 EOCORTEX_PASS = getattr(settings, "EOCORTEX_PASS", "")
 
+
 class EocortexManager(object):
     def __init__(self) -> None:
         self.base_url = self.get_base_url()
@@ -58,9 +59,7 @@ class EocortexManager(object):
         }
 
         try:
-            response = requests.post(
-                url, json=body, headers={"Authorization": "Basic cm9vdDo="}
-            )
+            response = requests.post(url, json=body, headers=self.get_credentials())
             response.raise_for_status()
 
             try:
@@ -149,14 +148,12 @@ class EocortexManager(object):
         start_time = start_ts.strftime("%d.%m.%Y %H:%M:%S")
         finish_time = end_ts.strftime("%d.%m.%Y %H:%M:%S")
         params = {
-            "login": "root",
-            "password": None,
             "responsetype": "json",
             "eventid": eventid,
             "starttime": start_time,
             "endtime": finish_time,
         }
-        response = requests.get(url, params=params)
+        response = requests.get(url, params=params, headers=self.get_credentials())
 
         content_text = response.content.decode("utf-8-sig")
         if response.status_code != 200:
@@ -174,7 +171,7 @@ class EocortexManager(object):
 
             if not s.startswith("{"):
                 json_st = "{" + json_st
-            
+
             if json_st == "{}":
                 continue
             json_object.append(json.loads(json_st))
