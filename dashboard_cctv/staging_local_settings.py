@@ -69,3 +69,5 @@ REFRESH_JWT_SECRET_KEY = "barakadut890"
 REFRESH_JWT_ALGORITHMS = ["HS256"]
 
 HLS_BASE_URL = "https://stream.arnatech.id"
+EOCORTEX_USER = "root"
+EOCORTEX_PASS = "9J7SVbDbMNpHTRx"

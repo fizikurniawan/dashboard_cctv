@@ -1,19 +1,23 @@
 import requests
 import json
 import base64
+import hashlib
 from datetime import datetime
 from common.models import Configuration
 from cctv.models import Camera
+from django.conf import settings
 
+EOCORTEX_USER = getattr(settings, "EOCORTEX_USER", "root")
+EOCORTEX_PASS = getattr(settings, "EOCORTEX_PASS", "")
 
 class EocortexManager(object):
     def __init__(self) -> None:
         self.base_url = self.get_base_url()
+        self.user = EOCORTEX_USER
+        self.password = hashlib.md5(EOCORTEX_PASS.encode()).hexdigest()
 
     def get_credentials(self):
-        login = "root"
-        password = ""
-        credentials = f"{login}:{password}"
+        credentials = f"{self.user}:{self.password}"
         encoded_credentials = base64.b64encode(credentials.encode()).decode()
         headers = {"Authorization": f"Basic {encoded_credentials}"}
 
