@@ -52,7 +52,6 @@ def get_lpr_task():
     _thread_locals.user = user
 
     start_ts = datetime.now() - timedelta(hours=5)
-    start_ts = datetime.now() - timedelta(hours=7000)
     end_ts = datetime.now()
 
     print({"action": "getting eocortext", "start_ts": start_ts, "end_ts": end_ts})
