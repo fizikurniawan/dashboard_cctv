@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Vehicle, VehicleType, Person
+from common.serializers import FileLiteSerializer
 
 
 class VehicleTypeSerializer(serializers.ModelSerializer):
@@ -15,6 +16,7 @@ class VehicleSerializer(serializers.ModelSerializer):
     vehicle_type = serializers.SerializerMethodField()
     person = serializers.SerializerMethodField()
     last_checkin_timestamp = serializers.SerializerMethodField()
+    last_snapshot = serializers.SerializerMethodField()
 
     def get_vehicle_type(self, instance):
         return VehicleTypeSerializer(instance.vehicle_type).data
@@ -28,8 +30,15 @@ class VehicleSerializer(serializers.ModelSerializer):
             "no_id": instance.person.no_id,
             "id32": instance.person.id32,
         }
+
     def get_last_checkin_timestamp(self, instance):
         return instance.last_checkin
+
+    def get_last_snapshot(self, instance):
+        instance_snapshot = instance.last_snapshot
+        if not instance_snapshot:
+            return
+        return FileLiteSerializer(instance_snapshot).data
 
     class Meta:
         model = Vehicle
@@ -39,8 +48,14 @@ class VehicleSerializer(serializers.ModelSerializer):
             "vehicle_type",
             "person",
             "last_checkin_timestamp",
+            "last_snapshot",
         )
-        read_only_fields = ("full_name", "no_id", "last_checkin_timestamp")
+        read_only_fields = (
+            "full_name",
+            "no_id",
+            "last_checkin_timestamp",
+            "last_snapshot",
+        )
 
 
 class VehicleWriteSerializer(VehicleSerializer):
@@ -59,11 +74,13 @@ class VehicleWriteSerializer(VehicleSerializer):
             raise serializers.ValidationError("invalid vehicle type")
         return instance
 
+
 class VehicleLiteSerializer(serializers.ModelSerializer):
     vehicle_type = serializers.SerializerMethodField()
 
     def get_vehicle_type(self, instance):
         return VehicleTypeSerializer(instance.vehicle_type).data
+
     class Meta:
         model = Vehicle
         fields = ("id32", "license_plate_number", "vehicle_type")

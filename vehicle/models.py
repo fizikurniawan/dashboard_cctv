@@ -54,6 +54,23 @@ class Vehicle(BaseModelGeneric):
         return last_check_in_ts if last_check_in_ts else None
 
     @property
+    def last_snapshot(self):
+        from activity.models import LPR
+
+        lpr_instance = (
+            LPR.objects.filter(
+                vehicle=self,
+                direction__iexact="in",
+            )
+            .order_by("-time_utc_timestamp")
+            .first()
+        )
+        if not lpr_instance:
+            return
+
+        return lpr_instance.snapshot
+
+    @property
     def last_checkin_str(self):
         from datetime import datetime
 
