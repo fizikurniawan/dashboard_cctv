@@ -3,9 +3,13 @@ import json
 import base64
 import hashlib
 from datetime import datetime
-from common.models import Configuration
+from common.models import Configuration, File
 from cctv.models import Camera
+from activity.models import LPR
 from django.conf import settings
+from django.core.files.base import ContentFile
+import urllib
+
 
 EOCORTEX_USER = getattr(settings, "EOCORTEX_USER", "root")
 EOCORTEX_PASS = getattr(settings, "EOCORTEX_PASS", "")
@@ -186,3 +190,24 @@ class EocortexManager(object):
         )
 
         return json_object
+
+    def get_lpr_sn(self, channel_id: str, lpr_instance: LPR):
+        url = self.base_url + "/site"
+        params = {
+            "resolutionx": 1920,
+            "resolutiony": 1080,
+            "oneframeonly": True,
+            "withcontenttype": True,
+            "mode": "archive",
+            "startTime": lpr_instance.time_utc_str_get_sn,
+            "channelid": channel_id,
+        }
+        response = requests.get(url, params=params, headers=self.get_credentials())
+
+        file_name = f"sn_lpr_{lpr_instance.number_plate}_{lpr_instance.id}.jpg"
+        file_content = ContentFile(response.content, file_name)
+        file_instance = File.objects.create(
+            name=file_name, file=file_content, content_object=lpr_instance
+        )
+
+        return file_instance

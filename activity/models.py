@@ -1,9 +1,11 @@
 from django.db import models
 from libs.base_model import BaseModelGeneric
 from cctv.models import Camera
+from common.models import File
 from vehicle.models import Vehicle, Person
 from uuid import uuid4
 from django.utils.translation import gettext_lazy as _
+from datetime import datetime
 
 
 class CheckIn(BaseModelGeneric):
@@ -69,6 +71,13 @@ class LPR(models.Model):
     )
     direction = models.CharField(choices=DIRECTION_CHOICES, max_length=20)
     time_utc_timestamp = models.BigIntegerField()
+    snapshot = models.ForeignKey(
+        File,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="%(app_label)s_%(class)s_snapshot",
+    )
 
     def __str__(self):
         return f"{self.channel_id} - {self.number_plate} - {self.direction} - {self.time_utc_str}"
@@ -97,6 +106,11 @@ class LPR(models.Model):
         from libs.moment import convert_timestamp_ms_to_date
 
         return convert_timestamp_ms_to_date(self.time_utc_timestamp)
+
+    @property
+    def time_utc_str_get_sn(self):
+        dt_object = datetime.fromtimestamp(self.time_utc_timestamp / 1000)
+        return dt_object.strftime("%d.%m.%Y %H:%M:%S")
 
     class Meta:
         verbose_name = _("LPR")

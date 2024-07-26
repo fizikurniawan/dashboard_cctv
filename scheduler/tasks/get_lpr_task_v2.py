@@ -4,6 +4,9 @@ from libs.eocortex import EocortexManager
 from datetime import datetime, timedelta
 from cctv.models import Camera
 from activity.models import LPR, Vehicle
+from django.conf import settings
+from auth.models import User
+from libs.middleware import _thread_locals
 
 
 def extract_number_plate(text):
@@ -38,7 +41,18 @@ def get_lpr_task():
     print("running get_lpr_task_v2 at ", datetime.now())
     em = EocortexManager()
 
+    # lets set thread local with default user
+    default_user_email = getattr(
+        settings, "DEFAULT_DJANGO_USER", "admin@dashboard.cctv"
+    )
+    user = User.objects.filter(email=default_user_email).last()
+    if not user:
+        user = User.objects.filter(is_superuser=True).first()
+
+    _thread_locals.user = user
+
     start_ts = datetime.now() - timedelta(hours=5)
+    start_ts = datetime.now() - timedelta(hours=7000)
     end_ts = datetime.now()
 
     print({"action": "getting eocortext", "start_ts": start_ts, "end_ts": end_ts})
@@ -91,7 +105,26 @@ def get_lpr_task():
             defaults = {"camera": camera, "vehicle": exists_vehicle}
 
             # Use update_or_create to find and update, or create a new entry
-            LPR.objects.update_or_create(defaults=defaults, **search_criteria)
+            lpr_instance, _ = LPR.objects.update_or_create(
+                defaults=defaults, **search_criteria
+            )
+
+            # get or create file sn
+            try:
+                if lpr_instance.snapshot:
+                    continue
+                snapshot_file = em.get_lpr_sn(channel_id, lpr_instance)
+                lpr_instance.snapshot = snapshot_file
+                lpr_instance.save()
+            except Exception as err:
+                print(
+                    {
+                        "message": "Failed create Snapshoot LPR. Saving without snapshot",
+                        "error": str(err),
+                        "traceback": traceback.format_exc(),
+                    }
+                )
+
         except Exception as err:
             print(
                 {

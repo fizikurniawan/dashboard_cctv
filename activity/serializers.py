@@ -4,11 +4,13 @@ from .models import LPR, CheckIn
 from person.serializers import PersonReadSerializer
 from django.shortcuts import get_object_or_404
 from time import time
+from common.serializers import FileLiteSerializer
 
 
 class LPRSerializer(serializers.ModelSerializer):
     camera = serializers.SerializerMethodField()
     vehicle = serializers.SerializerMethodField()
+    snapshot = serializers.SerializerMethodField()
 
     def get_camera(self, instance):
         if not instance.camera:
@@ -19,6 +21,11 @@ class LPRSerializer(serializers.ModelSerializer):
         if not instance.vehicle:
             return
         return VehicleSerializer(instance.vehicle).data
+
+    def get_snapshot(self, instance):
+        if not instance.snapshot:
+            return
+        return FileLiteSerializer(instance.snapshot).data
 
     class Meta:
         model = LPR

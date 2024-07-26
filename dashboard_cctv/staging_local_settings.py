@@ -71,3 +71,4 @@ REFRESH_JWT_ALGORITHMS = ["HS256"]
 HLS_BASE_URL = "https://stream.arnatech.id"
 EOCORTEX_USER = "root"
 EOCORTEX_PASS = "9J7SVbDbMNpHTRx"
+DEFAULT_DJANGO_USER = "admin@dashboard.cctv"
