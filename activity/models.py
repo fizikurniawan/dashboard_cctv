@@ -1,3 +1,4 @@
+import pytz
 from django.db import models
 from libs.base_model import BaseModelGeneric
 from cctv.models import Camera
@@ -6,6 +7,8 @@ from vehicle.models import Vehicle, Person
 from uuid import uuid4
 from django.utils.translation import gettext_lazy as _
 from datetime import datetime
+from django.utils import timezone
+from django.db.models import Max
 
 
 class CheckIn(BaseModelGeneric):
@@ -15,6 +18,7 @@ class CheckIn(BaseModelGeneric):
         ("berkunjung", "Berkunjung"),
         ("patroli", "Patroli"),
     )
+    visitor_id = models.CharField(max_length=40, null=True, blank=True)
     person = models.ForeignKey(
         Person,
         on_delete=models.SET_NULL,
@@ -43,6 +47,28 @@ class CheckIn(BaseModelGeneric):
                 self.purpose_of_visit, self.purpose_of_visit
             ),
         }
+
+    def save(self, *args, **kwargs):
+        is_visitor = getattr(self.person, "person_type", "") == Person.VISITOR
+        if is_visitor and not self.visitor_id:
+            # Set timezone ke Asia/Jakarta
+            jakarta_tz = pytz.timezone("Asia/Jakarta")
+            today = timezone.now().astimezone(jakarta_tz).strftime("%d%m%y")
+            prefix = f"KPAD.{today}."
+
+            max_id = self.__class__.objects.filter(
+                visitor_id__startswith=prefix
+            ).aggregate(max=Max("visitor_id"))["max"]
+
+            if max_id:
+                last_sequence = int(max_id.split(".")[-1])
+                new_sequence = last_sequence + 1
+            else:
+                new_sequence = 1
+
+            self.visitor_id = f"{prefix}{new_sequence:04d}"
+
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = _("CheckIn")

@@ -32,7 +32,7 @@ class CheckInViewSet(viewsets.ModelViewSet):
         "vehicle__vehicle_type__name",
     )
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
-    queryset = CheckIn.objects.filter()
+    queryset = CheckIn.objects.filter().order_by("-created_at")
     http_method_names = ["get", "head", "options"]
     serializer_class = CheckInSerializer
     lookup_field = "uuid"

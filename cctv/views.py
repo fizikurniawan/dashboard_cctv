@@ -30,7 +30,7 @@ class LocationViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ("name", "description")
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
-    queryset = Location.objects.filter()
+    queryset = Location.objects.filter().order_by("-created_at")
     http_method_names = ["get", "post", "patch", "delete", "head", "options"]
     serializer_class = LocationSerializer
     lookup_field = "id32"
@@ -41,7 +41,7 @@ class CameraViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter, django_filters.DjangoFilterBackend)
     search_fields = ("name", "channel_id")
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
-    queryset = Camera.objects.filter()
+    queryset = Camera.objects.filter().order_by("-created_at")
     http_method_names = ["get", "post", "patch", "delete", "head", "options"]
     serializer_class = CameraSerializer
     filterset_class = CameraFilterset
@@ -79,7 +79,7 @@ class CommandCenterViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ("cameras__channel_id", "cameras__location__name", "name")
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
-    queryset = CommandCenter.objects.filter()
+    queryset = CommandCenter.objects.filter().order_by("-created_at")
     http_method_names = ["get", "head", "options", "post", "put", "delete"]
     lookup_field = "id32"
 

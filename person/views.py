@@ -20,7 +20,7 @@ class PersonFilterset(django_filters.FilterSet):
 
 
 class PersonViewSet(viewsets.ModelViewSet):
-    queryset = Person.objects.filter()
+    queryset = Person.objects.filter().order_by("-created_at")
     pagination_class = CustomPagination
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
     filterset_class = CreatedAtFilterMixin

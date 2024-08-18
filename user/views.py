@@ -12,7 +12,7 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ("full_name", "last_name", "username")
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
-    queryset = User.objects.filter()
+    queryset = User.objects.filter().order_by("-date_joined")
     http_method_names = ["get", "post", "patch", "delete", "head", "options"]
 
     def get_serializer_class(self):
@@ -26,6 +26,6 @@ class RoleViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ("name",)
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
-    queryset = Group.objects.filter()
+    queryset = Group.objects.filter().order_by("-id")
     serializer_class = RoleSerializer
     http_method_names = ["get", "post", "patch", "delete", "head", "options"]

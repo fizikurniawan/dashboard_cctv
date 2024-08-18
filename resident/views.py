@@ -18,7 +18,7 @@ from vehicle.models import Vehicle
 
 
 class ResidentViewSet(viewsets.ModelViewSet):
-    queryset = Resident.objects.filter()
+    queryset = Resident.objects.filter().order_by("-created_at")
     pagination_class = CustomPagination
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
     filterset_class = CreatedAtFilterMixin

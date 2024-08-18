@@ -59,6 +59,7 @@ class CheckInSerializer(serializers.ModelSerializer):
             "check_out_timestamp",
             "vehicle",
             "purpose_of_visit",
+            "visitor_id",
         )
 
 
