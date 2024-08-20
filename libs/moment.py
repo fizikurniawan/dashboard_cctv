@@ -17,7 +17,7 @@
 """
 
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from django.utils.dateformat import format
 
 
@@ -62,3 +62,7 @@ def convert_timestamp_ms_to_date(timestamp_ms: int) -> str:
     datetime_str = datetime_obj.strftime("%d.%m.%Y %H.%M.%S.%f")
 
     return datetime_str
+
+def get_millisecond_timestamp(date):
+    dt = datetime.combine(date, datetime.min.time(), tzinfo=timezone.utc)
+    return int(dt.timestamp()) * 1000

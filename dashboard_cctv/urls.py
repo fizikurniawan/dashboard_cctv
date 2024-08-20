@@ -25,6 +25,7 @@ from vehicle.router import router as vehicle_router
 from person.router import router as person_router
 from activity.router import router as activity_router
 from user.router import router as user_router
+from statistic.router import router as statistic_router
 from auth.router import router as auth_router
 from django.conf.urls.i18n import i18n_patterns
 from django.views.i18n import set_language
@@ -51,6 +52,7 @@ urlpatterns = [
     path("api/person/", include(person_router.urls)),
     path("api/activity/", include(activity_router.urls)),
     path("api/user/", include(user_router.urls)),
+    path("api/statistic/", include(statistic_router.urls)),
     path("i18n/setlang/", set_language, name="set_language"),
     path("i18n/setlang/", set_language, name="set_language"),
     path(
