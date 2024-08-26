@@ -4,6 +4,8 @@ from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from libs.filter import CreatedAtFilterMixin
 from libs.pagination import CustomPagination
 from libs.person import get_last_person
+from libs.permission import RBACPermission
+from libs import constants
 from .models import Person
 from .serializers import PersonReadSerializer, PersonWriteSerializer
 from django.core.files.base import ContentFile
@@ -22,13 +24,31 @@ class PersonFilterset(django_filters.FilterSet):
 class PersonViewSet(viewsets.ModelViewSet):
     queryset = Person.objects.filter().order_by("-created_at")
     pagination_class = CustomPagination
-    permission_classes = (IsAuthenticated, DjangoModelPermissions)
+    permission_classes = (IsAuthenticated, RBACPermission)
     filterset_class = CreatedAtFilterMixin
     filter_backends = (filters.SearchFilter, django_filters.DjangoFilterBackend)
     search_fields = ("full_name", "no_id", "address")
     http_method_names = ["get", "post", "put", "delete", "head", "options"]
     lookup_field = "id32"
     filterset_class = PersonFilterset
+    PERMISSION_REQUIRES = {
+        constants.PRINCIPAL_ROLE: [
+            "list",
+            "create",
+            "retrieve",
+            "put",
+            "destroy",
+            "get_last_person",
+        ],
+        constants.SUPERVISOR_ROLE: [
+            "list",
+            "create",
+            "retrieve",
+            "put",
+            "destroy",
+            "get_last_person",
+        ],
+    }
 
     def get_serializer_class(self):
         if self.action in ["create", "update"]:

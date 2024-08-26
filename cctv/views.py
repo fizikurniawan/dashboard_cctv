@@ -29,7 +29,7 @@ class LocationViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ("name", "description")
-    permission_classes = (IsAuthenticated, DjangoModelPermissions)
+    permission_classes = (IsAuthenticated, )
     queryset = Location.objects.filter().order_by("-created_at")
     http_method_names = ["get", "post", "patch", "delete", "head", "options"]
     serializer_class = LocationSerializer
@@ -40,7 +40,7 @@ class CameraViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPagination
     filter_backends = (filters.SearchFilter, django_filters.DjangoFilterBackend)
     search_fields = ("name", "channel_id")
-    permission_classes = (IsAuthenticated, DjangoModelPermissions)
+    permission_classes = (IsAuthenticated, )
     queryset = Camera.objects.filter().order_by("-created_at")
     http_method_names = ["get", "post", "patch", "delete", "head", "options"]
     serializer_class = CameraSerializer

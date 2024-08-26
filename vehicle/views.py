@@ -12,7 +12,9 @@ from .serializers import (
     VehicleWriteSerializer,
     VehicleTypeSerializer,
 )
+from libs import constants
 from libs.csv import create_csv_file
+from libs.permission import RBACPermission
 
 
 class VehicleFilter(CreatedAtFilterMixin):
@@ -25,22 +27,53 @@ class VehicleTypeViewSet(viewsets.ModelViewSet):
     queryset = VehicleType.objects.all().order_by("-created_at")
     serializer_class = VehicleTypeSerializer
     lookup_field = "id32"
-    permission_classes = [IsAuthenticated, DjangoModelPermissions]
+    permission_classes = [IsAuthenticated, RBACPermission]
     pagination_class = CustomPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ("name",)
     http_method_names = ["get", "post", "patch", "delete", "head", "options"]
+    PERMISSION_REQUIRES = {
+        constants.PRINCIPAL_ROLE: [
+            "list",
+            "create",
+            "retrieve",
+            "partial_update",
+            "destroy",
+        ],
+        constants.SUPERVISOR_ROLE: [
+            "list",
+            "retrieve",
+        ],
+    }
 
 
 class VehicleViewSet(viewsets.ModelViewSet):
     queryset = Vehicle.objects.filter().order_by("-created_at")
     lookup_field = "id32"
-    permission_classes = [IsAuthenticated, DjangoModelPermissions]
+    permission_classes = [IsAuthenticated, RBACPermission]
     pagination_class = CustomPagination
     filterset_class = VehicleFilter
     filter_backends = (filters.SearchFilter, django_filters.DjangoFilterBackend)
     search_fields = ("owner__full_name", "owner__no_id", "license_plate_number")
     http_method_names = ["get", "post", "patch", "delete", "head", "options"]
+    PERMISSION_REQUIRES = {
+        constants.PRINCIPAL_ROLE: [
+            "list",
+            "create",
+            "retrieve",
+            "partial_update",
+            "destroy",
+            "get_csv",
+        ],
+        constants.SUPERVISOR_ROLE: [
+            "list",
+            "create",
+            "retrieve",
+            "partial_update",
+            "destroy",
+            "get_csv",
+        ],
+    }
 
     def perform_create(self, serializer):
         instance = serializer.save()
@@ -66,7 +99,7 @@ class VehicleViewSet(viewsets.ModelViewSet):
                     "Nomor Kendaraan": q.license_plate_number,
                     "Tipe Kendaraan": q.vehicle_type.name,
                     "Pemilik": q.owner.full_name,
-                    "Last Checkin": q.last_checkin_str
+                    "Last Checkin": q.last_checkin_str,
                 }
             )
 

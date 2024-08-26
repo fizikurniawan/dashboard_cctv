@@ -1,6 +1,8 @@
 from rest_framework import viewsets, filters
 from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from libs.pagination import CustomPagination
+from libs.permission import RBACPermission
+from libs import constants
 from .models import LPR, CheckIn
 from .serializers import LPRSerializer, CheckInSerializer, CheckOutSerializer
 from django_filters import rest_framework as django_filters
@@ -14,8 +16,8 @@ class LPRViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPagination
     filter_backends = (filters.SearchFilter, django_filters.DjangoFilterBackend)
     search_fields = ("number_plate",)
-    permission_classes = (IsAuthenticated, DjangoModelPermissions)
-    queryset = LPR.objects.filter().order_by('-time_utc_timestamp')
+    permission_classes = (IsAuthenticated,)
+    queryset = LPR.objects.filter().order_by("-time_utc_timestamp")
     http_method_names = ["get", "head", "options"]
     serializer_class = LPRSerializer
     lookup_field = "uuid"
@@ -31,12 +33,32 @@ class CheckInViewSet(viewsets.ModelViewSet):
         "vehicle__license_plate_number",
         "vehicle__vehicle_type__name",
     )
-    permission_classes = (IsAuthenticated, DjangoModelPermissions)
+    permission_classes = (IsAuthenticated, RBACPermission)
     queryset = CheckIn.objects.filter().order_by("-created_at")
     http_method_names = ["get", "head", "options"]
     serializer_class = CheckInSerializer
     lookup_field = "uuid"
 
+    PERMISSION_REQUIRES = {
+        constants.PRINCIPAL_ROLE: [
+            "list",
+            "retrieve",
+        ],
+        constants.SUPERVISOR_ROLE: [
+            "list",
+            "retrieve",
+        ],
+    }
+
 
 class CheckOutViewSet(viewsets.GenericViewSet, viewsets.mixins.CreateModelMixin):
     serializer_class = CheckOutSerializer
+    permission_classes = (IsAuthenticated, RBACPermission)
+    PERMISSION_REQUIRES = {
+        constants.PRINCIPAL_ROLE: [
+            "create",
+        ],
+        constants.SUPERVISOR_ROLE: [
+            "create",
+        ],
+    }
