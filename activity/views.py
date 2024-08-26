@@ -44,7 +44,7 @@ class CheckInViewSet(viewsets.ModelViewSet):
             "list",
             "retrieve",
         ],
-        constants.SUPERVISOR_ROLE: [
+        constants.SUPERADMIN_ROLE: [
             "list",
             "retrieve",
         ],
@@ -58,7 +58,7 @@ class CheckOutViewSet(viewsets.GenericViewSet, viewsets.mixins.CreateModelMixin)
         constants.PRINCIPAL_ROLE: [
             "create",
         ],
-        constants.SUPERVISOR_ROLE: [
+        constants.SUPERADMIN_ROLE: [
             "create",
         ],
     }

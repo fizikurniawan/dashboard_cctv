@@ -40,7 +40,7 @@ class PersonViewSet(viewsets.ModelViewSet):
             "destroy",
             "get_last_person",
         ],
-        constants.SUPERVISOR_ROLE: [
+        constants.SUPERADMIN_ROLE: [
             "list",
             "create",
             "retrieve",

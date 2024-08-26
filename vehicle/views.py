@@ -40,7 +40,7 @@ class VehicleTypeViewSet(viewsets.ModelViewSet):
             "partial_update",
             "destroy",
         ],
-        constants.SUPERVISOR_ROLE: [
+        constants.SUPERADMIN_ROLE: [
             "list",
             "retrieve",
         ],
@@ -65,7 +65,7 @@ class VehicleViewSet(viewsets.ModelViewSet):
             "destroy",
             "get_csv",
         ],
-        constants.SUPERVISOR_ROLE: [
+        constants.SUPERADMIN_ROLE: [
             "list",
             "create",
             "retrieve",

@@ -24,7 +24,7 @@ class UserViewSet(viewsets.ModelViewSet):
             "partial_update",
             "destroy",
         ],
-        constants.SUPERVISOR_ROLE: [
+        constants.SUPERADMIN_ROLE: [
             "list",
             "create",
             "retrieve",
@@ -55,7 +55,7 @@ class RoleViewSet(viewsets.ModelViewSet):
             "partial_update",
             "destroy",
         ],
-        constants.SUPERVISOR_ROLE: [
+        constants.SUPERADMIN_ROLE: [
             "list",
             "create",
             "retrieve",
