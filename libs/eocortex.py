@@ -211,3 +211,57 @@ class EocortexManager(object):
         )
 
         return file_instance
+    
+    def send_ptz_command(self, command, params):
+        url = f"{self.base_url}/ptz?command={command}&login={self.user}&password={self.password}"
+        url += ''.join([f"&{key}={value}" for key, value in params.items()])
+        response = requests.get(url, headers=self.get_credentials())
+        response.raise_for_status()
+        return response.text
+
+    def get_ptz_capabilities(self, channel_id):
+        params = {'channelid': channel_id, 'responsetype': 'json'}
+        return self.send_ptz_command('getcapabilities', params)
+
+    def continuous_move(self, channel_id, pan_speed=0, tilt_speed=0, stop_timeout=500):
+        params = {
+            'channelid': channel_id,
+            'panspeed': pan_speed,
+            'tiltspeed': tilt_speed,
+            'stoptimeout': stop_timeout
+        }
+        return self.send_ptz_command('startmove', params)
+
+    def stop_movement(self, channel_id):
+        params = {'channelid': channel_id}
+        return self.send_ptz_command('stop', params)
+
+    def step_zoom(self, channel_id, zoom_step):
+        params = {'channelid': channel_id, 'zoomstep': zoom_step}
+        return self.send_ptz_command('zoom', params)
+
+    def continuous_zoom(self, channel_id, speed, stop_timeout=500):
+        params = {
+            'channelid': channel_id,
+            'speed': speed,
+            'stoptimeout': stop_timeout
+        }
+        return self.send_ptz_command('startzoom', params)
+
+    def set_preset(self, channel_id, index):
+        params = {'channelid': channel_id, 'index': index}
+        return self.send_ptz_command('gotopreset', params)
+
+    def auto_focus(self, channel_id):
+        params = {'channelid': channel_id}
+        return self.send_ptz_command('setautofocus', params)
+
+    def center_camera(self, channel_id, width, height, x, y):
+        params = {
+            'channelid': channel_id,
+            'width': width,
+            'height': height,
+            'x': x,
+            'y': y
+        }
+        return self.send_ptz_command('moveto', params)
