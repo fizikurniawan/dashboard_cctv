@@ -13,6 +13,7 @@ from django_filters import rest_framework as django_filters
 from django.shortcuts import get_object_or_404
 from datetime import datetime, time
 from django.utils.timezone import make_aware
+from libs.eocortex import EocortexManager
 
 
 class CameraFilterset(django_filters.FilterSet):
@@ -46,6 +47,55 @@ class CameraViewSet(viewsets.ModelViewSet):
     serializer_class = CameraSerializer
     filterset_class = CameraFilterset
     lookup_field = "id32"
+
+    # PTZ Control Actions
+    @decorators.action(methods=["POST"], detail=True, url_path="ptz/zoom-in")
+    def zoom_in(self, request, pk=None):
+        camera = self.get_object()
+        manager = EocortexManager()
+        response_data = manager.step_zoom(camera.channel_id, zoom_step=5)  # Example step value
+        return response.Response(response_data)
+
+    @decorators.action(methods=["POST"], detail=True, url_path="ptz/zoom-out")
+    def zoom_out(self, request, pk=None):
+        camera = self.get_object()
+        manager = EocortexManager()
+        response_data = manager.step_zoom(camera.channel_id, zoom_step=-5)  # Example step value
+        return response.Response(response_data)
+
+    @decorators.action(methods=["POST"], detail=True, url_path="ptz/move")
+    def move_camera(self, request, pk=None):
+        camera = self.get_object()
+        pan_speed = request.data.get("pan_speed", 0)
+        tilt_speed = request.data.get("tilt_speed", 0)
+        manager = EocortexManager()
+        response_data = manager.continuous_move(camera.channel_id, pan_speed, tilt_speed)
+        return response.Response(response_data)
+
+    @decorators.action(methods=["POST"], detail=True, url_path="ptz/stop")
+    def stop_movement(self, request, pk=None):
+        camera = self.get_object()
+        manager = EocortexManager()
+        response_data = manager.stop_movement(camera.channel_id)
+        return response.Response(response_data)
+
+    @decorators.action(methods=["POST"], detail=True, url_path="ptz/auto-focus")
+    def auto_focus(self, request, pk=None):
+        camera = self.get_object()
+        manager = EocortexManager()
+        response_data = manager.auto_focus(camera.channel_id)
+        return response.Response(response_data)
+
+    @decorators.action(methods=["POST"], detail=True, url_path="ptz/center")
+    def center_camera(self, request, pk=None):
+        camera = self.get_object()
+        width = request.data.get("width")
+        height = request.data.get("height")
+        x = request.data.get("x")
+        y = request.data.get("y")
+        manager = EocortexManager()
+        response_data = manager.center_camera(camera.channel_id, width, height, x, y)
+        return response.Response(response_data)
 
     @decorators.action(
         methods=["GET"], detail=False, url_path=r"(?P<channel_id>[^/.]+)/statistic"

@@ -3,7 +3,6 @@
 import os
 import datetime
 
-# BASE_URL = "http://127.0.0.1:8000/"
 BASE_URL = "https://cctv.arnatech.id/"
 FE_BASE_URL = "https://dashboard-cctv.staging.arnatech.id/"
 DASHBOARD_BASE_URL = "https://dashboard-cctv-dashboard.staging.arnatech.id/"
@@ -17,9 +16,9 @@ DATABASES = {
         "ENGINE": "django.contrib.gis.db.backends.postgis",
         "NAME": "dashboard_cctv_db",
         "USER": "postgres",
-        "PASSWORD": "7a8UJbM2GgBWaseh0lnP3O5i1i5nINXk",
-        "HOST": "172.105.124.43",
-        "PORT": "5432",
+        "PASSWORD": "Barakadut1234!",
+        "HOST": "host.docker.internal",
+        "PORT": "8006",
         "TEST": {"NAME": "dashboard_cctv_db_staging"},
     },
     "vms_system": {
@@ -44,16 +43,16 @@ from datetime import timedelta
 
 EXPIRED_VERIFY_TOKEN = timedelta(hours=4)  # set 4 hours after sending email
 
-USE_S3 = True
-DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+USE_S3 = False
+# DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 # STATICFILES_STORAGE = "storages.backends.s3boto3.S3StaticStorage"
-AWS_ACCESS_KEY_ID = "FQYH52PFVIJ97EH7NX37"
-AWS_SECRET_ACCESS_KEY = "NUHTUy3LwmwkWCGOZPGRPB6jo56QDgNfMpldeCIi"
-AWS_STORAGE_BUCKET_NAME = "escrow-sg"
-AWS_S3_ENDPOINT_URL = "https://%s.ap-south-1.linodeobjects.com" % (
-    AWS_STORAGE_BUCKET_NAME
-)
-AWS_S3_SIGNATURE_VERSION = "s3v4"
+# AWS_ACCESS_KEY_ID = "FQYH52PFVIJ97EH7NX37"
+# AWS_SECRET_ACCESS_KEY = "NUHTUy3LwmwkWCGOZPGRPB6jo56QDgNfMpldeCIi"
+# AWS_STORAGE_BUCKET_NAME = "escrow-sg"
+# AWS_S3_ENDPOINT_URL = "https://%s.ap-south-1.linodeobjects.com" % (
+#    AWS_STORAGE_BUCKET_NAME
+#)
+# AWS_S3_SIGNATURE_VERSION = "s3v4"
 
 
 # default JWT
@@ -71,4 +70,3 @@ REFRESH_JWT_ALGORITHMS = ["HS256"]
 HLS_BASE_URL = "https://stream.arnatech.id"
 EOCORTEX_USER = "root"
 EOCORTEX_PASS = "9J7SVbDbMNpHTRx"
-DEFAULT_DJANGO_USER = "admin@dashboard.cctv"
