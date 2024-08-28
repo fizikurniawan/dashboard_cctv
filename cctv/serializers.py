@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.contrib.gis.geos import Point
 from .models import Camera, Location, CommandCenter
 
 
@@ -9,13 +10,31 @@ class LocationSerializer(serializers.ModelSerializer):
         read_only_fields = ("id32",)
 
 
+class CoordinateWriteSerializer(serializers.Serializer):
+    lat = serializers.FloatField(required=True)  # Latitude
+    lng = serializers.FloatField(required=True)  # Longitude
+
+
 class CameraSerializer(serializers.ModelSerializer):
     location = serializers.CharField(required=False, allow_null=True)
+    coordinate = CoordinateWriteSerializer(
+        allow_null=True, required=False, write_only=True
+    )
+    icon_rotation = serializers.DecimalField(
+        max_digits=5, decimal_places=2, required=False, allow_null=True
+    )
 
     def to_representation(self, instance):
         resp_dict = super().to_representation(instance)
         if instance.location:
             resp_dict["location"] = LocationSerializer(instance.location).data
+
+        # Convert PointField ke dict { "lat": value, "lng": value }
+        if instance.coordinate:
+            resp_dict["coordinate"] = {
+                "lat": instance.coordinate.y,
+                "lng": instance.coordinate.x,
+            }
 
         return resp_dict
 
@@ -40,6 +59,18 @@ class CameraSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({"location": "invalid location"})
             attrs["location"] = location_instance
 
+        coordinate = attrs.get("coordinate")
+        if coordinate:
+            try:
+                # Pastikan format coordinate benar
+                lat = coordinate.get("lat")
+                lng = coordinate.get("lng")
+                attrs["coordinate"] = Point(lng, lat)
+            except (TypeError, ValueError):
+                raise serializers.ValidationError(
+                    {"coordinate": "Invalid coordinate values."}
+                )
+
         return attrs
 
     class Meta:
@@ -54,6 +85,8 @@ class CameraSerializer(serializers.ModelSerializer):
             "hls_url",
             "is_gate",
             "location",
+            "coordinate",
+            "icon_rotation",
         )
         read_only_fields = ("id32", "hls_url")
 

@@ -3,6 +3,7 @@ from django.db import models
 from django.conf import settings
 from libs.base_model import BaseModelGeneric
 from django.utils.translation import gettext_lazy as _
+from django.contrib.gis.db.models import PointField
 
 
 class Location(BaseModelGeneric):
@@ -26,6 +27,16 @@ class Camera(BaseModelGeneric):
     is_gate = models.BooleanField(default=False)
     location = models.ForeignKey(
         Location, on_delete=models.SET_NULL, null=True, blank=True
+    )
+
+    # osm requires
+    coordinate = PointField(null=True, blank=True, help_text="field untuk koordinat")
+    icon_rotation = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Field untuk rotasi ikon, range 0.00 - 359.99",
     )
 
     def __str__(self):
