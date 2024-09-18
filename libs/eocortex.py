@@ -289,13 +289,8 @@ class EocortexManager(object):
 
         try:
             response = requests.post(url, json=payload, headers=self.get_credentials())
-            response.raise_for_status()
-            try:
-                return True, response.json()
-            except json.JSONDecodeError:
-                response.encoding = "utf-8-sig"
-                return False, response.json()
 
+            return response.status_code == 200, response.json()
         except Exception as e:
             print({"error": "request failed", "body": payload, "err": str(e)})
 

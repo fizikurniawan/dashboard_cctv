@@ -54,6 +54,7 @@ class PersonWriteSerializer(serializers.ModelSerializer):
     person_type = serializers.CharField()
     purpose_of_visit = serializers.CharField(required=False, allow_null=True)
     camera_photo_base64 = serializers.CharField(required=False, allow_null=True)
+    allow_fail_eocortex = serializers.BooleanField(default=True)
 
     def validate_person(self, data):
         if not data:
@@ -96,6 +97,7 @@ class PersonWriteSerializer(serializers.ModelSerializer):
         person_type = validated_data.get("person_type", None)
         purpose_of_visit = validated_data.pop("purpose_of_visit", None)
         camera_photo_base64 = validated_data.pop("camera_photo_base64", None)
+        allow_fail_eocortex = validated_data.pop("allow_fail_eocortex", False)
 
         if not person:
             person = Person.objects.filter(no_id=validated_data["no_id"]).first()
@@ -132,8 +134,8 @@ class PersonWriteSerializer(serializers.ModelSerializer):
             is_success, response = em.submit_img_to_face_reg(
                 camera_photo_base64, person
             )
-            if not is_success:
-                raise EocortexFailedFR(str(response))
+            if not is_success and not allow_fail_eocortex:
+                raise EocortexFailedFR(response.get("ErrorMessage", str(response)))
 
             check_in.camera_photo = file_instance
             check_in.save()
@@ -155,6 +157,7 @@ class PersonWriteSerializer(serializers.ModelSerializer):
             "created_at",
             "purpose_of_visit",
             "camera_photo_base64",
+            "allow_fail_eocortex",
         )
         write_only_fields = ("vehicle", "person", "purpose_of_visit")
         read_only_fields = ("id32", "created_at")
