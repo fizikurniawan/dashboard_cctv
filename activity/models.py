@@ -38,6 +38,12 @@ class CheckIn(BaseModelGeneric):
     purpose_of_visit = models.CharField(
         choices=PURPOSE_OF_VISIT_CHOICES, max_length=50, default="berkunjung"
     )
+    camera_photo = models.ForeignKey(
+        File, on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="%(app_label)s_%(class)s_camera_photo"
+    )
 
     @property
     def purpose_of_visit_dict(self):

@@ -99,3 +99,11 @@ def uuid_to_base62(uuid):
 def hash_uuid(uuid, length=16):
     hasher = hashlib.sha1(uuid.bytes)
     return hasher.hexdigest()[:length]  # return the first `length` characters
+
+def detect_image_type(base64_string):
+    if base64_string.startswith("iVBORw0KGgo"):
+        return "png"
+    elif base64_string.startswith("/9j/") or base64_string.startswith("FFD8"):
+        return "jpg"
+    else:
+        return "Unknown format"

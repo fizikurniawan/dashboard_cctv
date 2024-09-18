@@ -36,6 +36,7 @@ class CheckInSerializer(serializers.ModelSerializer):
     person = serializers.SerializerMethodField()
     vehicle = serializers.SerializerMethodField()
     purpose_of_visit = serializers.SerializerMethodField()
+    camera_photo = serializers.SerializerMethodField()
 
     def get_person(self, instance):
         if not instance.person:
@@ -50,6 +51,11 @@ class CheckInSerializer(serializers.ModelSerializer):
     def get_purpose_of_visit(self, instance):
         return instance.purpose_of_visit_dict
 
+    def get_camera_photo(self, instance):
+        if not instance.camera_photo:
+            return
+        return FileLiteSerializer(instance.camera_photo).data
+
     class Meta:
         model = CheckIn
         fields = (
@@ -60,6 +66,7 @@ class CheckInSerializer(serializers.ModelSerializer):
             "vehicle",
             "purpose_of_visit",
             "visitor_id",
+            "camera_photo",
         )
 
 

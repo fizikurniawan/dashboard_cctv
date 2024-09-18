@@ -1,9 +1,14 @@
+import base64
 from rest_framework import serializers
 from person.models import Person
-from common.serializers import FileLiteSerializer
+from common.serializers import FileLiteSerializer, File
 from vehicle.models import Vehicle, VehicleType
 from activity.models import CheckIn
 from time import time
+from libs.eocortex import EocortexManager
+from django.core.files.base import ContentFile
+from libs.utils import detect_image_type
+from libs.exception import EocortexFailedFR
 
 
 class VehicleLiteSerializer(serializers.ModelSerializer):
@@ -48,6 +53,7 @@ class PersonWriteSerializer(serializers.ModelSerializer):
     person = serializers.CharField(required=False, allow_null=True)
     person_type = serializers.CharField()
     purpose_of_visit = serializers.CharField(required=False, allow_null=True)
+    camera_photo_base64 = serializers.CharField(required=False, allow_null=True)
 
     def validate_person(self, data):
         if not data:
@@ -58,10 +64,30 @@ class PersonWriteSerializer(serializers.ModelSerializer):
         return person_instance
 
     def validate(self, attrs):
-        if attrs["person_type"] == Person.VISITOR and not attrs.get("purpose_of_visit"):
+        if attrs["person_type"] != Person.VISITOR:
+            return super().validate(attrs)
+
+        # camera_photo_base64 and purpose_of_visit is required for VISITOR
+        errors = {}
+        if not attrs.get("purpose_of_visit"):
+            errors["purpose_of_visit"] = ["this field is required"]
+
+        if not attrs.get("camera_photo_base64"):
+            errors["camera_photo_base64"] = ["this field is required"]
+
+        if errors:
+            raise serializers.ValidationError(errors)
+
+        ext = detect_image_type(attrs["camera_photo_base64"])
+        if ext not in ["png", "jpg"]:
             raise serializers.ValidationError(
-                {"purpose_of_visit": "this field is required"}
+                {
+                    "camera_photo_base64": [
+                        "invalid format photo. format should be png or jpg"
+                    ]
+                }
             )
+
         return super().validate(attrs)
 
     def create(self, validated_data):
@@ -69,6 +95,7 @@ class PersonWriteSerializer(serializers.ModelSerializer):
         vehicle = validated_data.pop("vehicle")
         person_type = validated_data.get("person_type", None)
         purpose_of_visit = validated_data.pop("purpose_of_visit", None)
+        camera_photo_base64 = validated_data.pop("camera_photo_base64", None)
 
         if not person:
             person = Person.objects.filter(no_id=validated_data["no_id"]).first()
@@ -86,12 +113,30 @@ class PersonWriteSerializer(serializers.ModelSerializer):
 
         # create activity check in if user_type is visitor
         if person_type and person_type == Person.VISITOR:
-            CheckIn.objects.create(
+            check_in = CheckIn.objects.create(
                 person=person,
                 check_in_timestamp=int(time() * 1000),
                 vehicle=vehicle_instance,
                 purpose_of_visit=purpose_of_visit,
             )
+
+            ext = detect_image_type(camera_photo_base64)
+            file_name = f"camera_photo_of_checkin_{check_in.id32}.{ext}"
+            file_data = ContentFile(
+                base64.b64decode(camera_photo_base64), name=file_name
+            )
+            file_instance = File.objects.create(file=file_data, name=file_name)
+
+            # let's submit eocortext facerecog
+            em = EocortexManager()
+            is_success, response = em.submit_img_to_face_reg(
+                camera_photo_base64, person
+            )
+            if not is_success:
+                raise EocortexFailedFR(str(response))
+
+            check_in.camera_photo = file_instance
+            check_in.save()
 
         return person
 
@@ -109,6 +154,7 @@ class PersonWriteSerializer(serializers.ModelSerializer):
             "person",
             "created_at",
             "purpose_of_visit",
+            "camera_photo_base64",
         )
         write_only_fields = ("vehicle", "person", "purpose_of_visit")
         read_only_fields = ("id32", "created_at")

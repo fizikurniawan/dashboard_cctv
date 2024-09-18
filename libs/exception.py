@@ -1,0 +1,2 @@
+class EocortexFailedFR(Exception):
+    pass

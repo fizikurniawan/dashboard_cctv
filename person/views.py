@@ -5,7 +5,7 @@ from libs.filter import CreatedAtFilterMixin
 from libs.pagination import CustomPagination
 from libs.person import get_last_person
 from libs.permission import RBACPermission
-from libs import constants
+from libs import constants, exception
 from .models import Person
 from .serializers import PersonReadSerializer, PersonWriteSerializer
 from django.core.files.base import ContentFile
@@ -13,6 +13,7 @@ import base64
 from common.models import File
 from common.serializers import FileLiteSerializer
 from vehicle.models import Vehicle
+from django.db import transaction
 
 
 class PersonFilterset(django_filters.FilterSet):
@@ -54,6 +55,39 @@ class PersonViewSet(viewsets.ModelViewSet):
         if self.action in ["create", "update"]:
             return PersonWriteSerializer
         return PersonReadSerializer
+
+    def create(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        with transaction.atomic():
+            sid = transaction.savepoint()
+            try:
+                self.perform_create(serializer)
+            except exception.EocortexFailedFR as err:
+                transaction.savepoint_rollback(sid)
+                return response.Response(
+                    {
+                        "errors": {"camera_photo_base64": [str(err)]},
+                        "message": "failed create data",
+                    },
+                    status=400,
+                )
+
+            except Exception as err:
+                transaction.savepoint_rollback(sid)
+                return response.Response(
+                    {
+                        "errors": {"non_field_error": [str(err)]},
+                        "message": "failed create data",
+                    },
+                    status=400,
+                )
+
+            transaction.savepoint_commit(sid)
+
+        headers = self.get_success_headers(serializer.data)
+        return response.Response(serializer.data, status=201, headers=headers)
 
     @decorators.action(methods=["GET"], detail=False, url_path="recent")
     def get_last_person(self, request):
